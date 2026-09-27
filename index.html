@@ -199,7 +199,7 @@
               AI Tutor Sidekick
             </span>
           </div>
-          <p class="text-xs text-gray-400 mb-3">Your personal guide & automated mentor</p>
+          <p class="text-xs text-gray-400 mb-3">Concept Companion (Pending Leadership Sign-off)</p>
 
           <!-- Dynamic Speech Bubble -->
           <div id="mascotBubble" class="w-full bg-brandDark/90 border border-brandTeal/30 rounded-2xl p-3.5 text-xs text-gray-200 text-left relative transition-all duration-300">
@@ -891,8 +891,12 @@
         actionBtn.onclick = nextQuestion;
       } else {
         AudioEngine.playMistake();
-        hearts = Math.max(0, hearts - 1);
-        document.getElementById('heartsCount').textContent = hearts;
+        if (currentAge !== 'kids') {
+          hearts = Math.max(0, hearts - 1);
+          document.getElementById('heartsCount').textContent = hearts;
+        } else {
+          document.getElementById('heartsCount').textContent = '∞';
+        }
 
         bottomBar.className = "border-t border-red-500 bg-red-950/90 backdrop-blur-md -mx-4 -mb-6 px-6 py-4 flex items-center justify-between";
         iconWrap.className = "w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center font-bold text-lg";

@@ -404,3 +404,28 @@ No production investment (auth, CMS, payments) until prototype validates: onboar
 ---
 
 *End of spec. Reviewer notes welcome; changes to Sections 7, 8, and 9.4 require re-review after the open questions in 12.2 are answered.*
+
+
+---
+
+## 14. Addendum: Synthesis & Operational Implementations (v0.2 Updates)
+
+### 14.1 Custom Domain & Infrastructure Cost Model (Zero-Cost Verification)
+- **Domain Linking Cost:** **$0.00 (Completely Free)**. Adding custom subdomains (`learn.savannamind.com`) and automated SSL certificate generation on Vercel is free on all tiers. Adding a CNAME record on an existing domain DNS registrar (e.g. Cloudflare, Namecheap, GoDaddy) has zero recurring cost.
+- **Commercial Licensing Distinction:**
+  - Vercel Hobby tier is free but restricted to non-commercial personal usage.
+  - For client deployment without subscription costs, **Cloudflare Pages** provides 100% free commercial static hosting and edge CDN in Nairobi.
+  - If deployed on Vercel under client commercial ownership, Vercel Pro is $20/month.
+
+### 14.2 Minor Safeguarding Implementation (ODPC 2025 Guidance)
+- **Zero-Penalty Child Flow:** The Grade 3–6 (Ages 8–10) track eliminates the 'Lives/Hearts' depletion mechanism. Child learners have infinite attempts (`∞`) and receive worked examples rather than failure states.
+- **Curated Interaction Shield:** Free-text input is strictly disabled for under-12 learners in the tutor drawer. Children interact via vetted, contextual prompt chips.
+- **Data Minimization:** No date of birth, school name, or biometric data is requested or stored.
+
+### 14.3 Mascot Persona Status
+- **Candidate Proposal:** The 3D-shaded cheetah companion ('Kibo') is designated as a **Design Concept Proposal**.
+- **Governance Gate:** Permanent character adoption, naming, and voice remain subject to formal founder sign-off by Dr. Tawfiq Bashir before production brand integration.
+
+### 14.4 Zero-Emoji Visual System
+- All Unicode emojis are strictly banished from interface and curriculum copy.
+- Vector iconography standardized exclusively on Lucide SVG (`flame`, `sparkles`, `sprout`, `briefcase`, `wheat`, `stethoscope`, `store`, `award`).

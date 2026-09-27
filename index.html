@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Savanna Mind Learn | Interactive AI Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandDark: '#060D18',
+            brandDarkSurface: '#081A1F',
+            brandCard: '#0B2228',
+            brandTeal: '#249EA0',
+            brandTealLight: '#26A9AB',
+            brandTealDark: '#125B5C',
+            brandAmber: '#FAAB36',
+            brandAmberDark: '#D48616',
+            brandBlue: '#0284C7',
+            brandIce: '#E2ECEE',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes bounce-slow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .animate-bounce-slow {
+      animation: bounce-slow 4s ease-in-out infinite;
+    }
+    .duo-button-bottom {
+      box-shadow: 0 5px 0 #125B5C;
+    }
+    .duo-button-bottom:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #125B5C;
+    }
+    .duo-amber-bottom {
+      box-shadow: 0 5px 0 #B87210;
+    }
+    .duo-amber-bottom:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #B87210;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #081A1F;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #249EA0;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-brandDark text-white min-h-screen flex flex-col font-sans select-none antialiased">
+
+  <!-- TOP APP HEADER -->
+  <header class="border-b border-brandTeal/20 bg-brandDarkSurface/90 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="restartOnboarding()">
+        <img src="logo.png" alt="Savanna Mind Logo" class="h-10 sm:h-12 w-auto object-contain" />
+        <span class="hidden sm:inline-block text-xs uppercase tracking-widest px-2.5 py-1 rounded-full bg-brandTeal/20 text-brandTeal border border-brandTeal/40 font-semibold">
+          Learn · Pillar 01
+        </span>
+      </div>
+
+      <!-- Gamification Stats & Controls (Zero Emojis - All SVG Icons) -->
+      <div class="flex items-center gap-3 sm:gap-6">
+        <!-- Active Track Pill -->
+        <button onclick="openOnboardingModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-brandCard border border-brandTeal/30 text-xs sm:text-sm text-gray-200 hover:border-brandTeal transition-colors">
+          <i data-lucide="compass" class="w-4 h-4 text-brandTeal"></i>
+          <span id="headerTrackName" class="font-medium">Agri-AI (18+)</span>
+          <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-gray-400"></i>
+        </button>
+
+        <!-- Streak -->
+        <div class="flex items-center gap-1.5 text-brandAmber font-bold text-sm sm:text-base" title="5 Day Learning Streak">
+          <i data-lucide="flame" class="w-5 h-5 text-brandAmber animate-pulse"></i>
+          <span id="streakCount">5</span>
+        </div>
+
+        <!-- XP Points -->
+        <div class="flex items-center gap-1.5 text-yellow-300 font-bold text-sm sm:text-base" title="Savanna XP Points">
+          <i data-lucide="sparkles" class="w-5 h-5 text-yellow-300"></i>
+          <span id="xpCount">420</span>
+        </div>
+
+        <!-- Hearts / Lives -->
+        <div class="flex items-center gap-1 text-red-400 font-bold text-sm sm:text-base" title="Remaining Tries">
+          <i data-lucide="heart" class="w-5 h-5 text-red-400"></i>
+          <span id="heartsCount">3</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN LEARNING ENGINE CONTAINER -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col justify-between">
+
+    <!-- Progress Bar -->
+    <div class="w-full mb-6">
+      <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
+        <span class="flex items-center gap-1">
+          <i data-lucide="book-open" class="w-3.5 h-3.5 text-brandTeal"></i>
+          <span id="lessonCategoryText">Module 1: Practical AI in Kenya</span>
+        </span>
+        <span id="lessonStepIndicator" class="font-mono text-brandTeal">Challenge 1 of 3</span>
+      </div>
+      <div class="w-full h-3.5 bg-gray-800 rounded-full overflow-hidden border border-brandTeal/30 p-0.5">
+        <div id="progressBar" class="h-full bg-gradient-to-r from-brandTeal to-cyan-400 rounded-full transition-all duration-500 ease-out" style="width: 33%"></div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID: Challenge Card (Left) & 3D Mascot Assistant (Right) -->
+    <div class="grid lg:grid-cols-12 gap-8 items-start mb-8">
+      
+      <!-- LEFT COLUMN: Challenge Canvas (Span 8) -->
+      <div class="lg:col-span-8 flex flex-col gap-5">
+
+        <!-- Question Prompt Header -->
+        <div class="bg-brandDarkSurface border border-brandTeal/30 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-32 h-32 bg-brandTeal/10 rounded-full blur-2xl pointer-events-none"></div>
+
+          <!-- Localized Context Tag -->
+          <div class="flex items-center gap-2 mb-3">
+            <span id="scenarioBadge" class="text-[11px] font-semibold tracking-wider uppercase px-2.5 py-0.5 rounded-full bg-brandTeal/20 text-brandTeal border border-brandTeal/30">
+              Kenyan Field Scenario
+            </span>
+            <span id="difficultyBadge" class="text-[11px] font-semibold tracking-wider uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+              Interactive Challenge
+            </span>
+          </div>
+
+          <h2 id="questionTitle" class="text-xl sm:text-2xl font-bold text-white mb-2 leading-snug">
+            Mama Jane in Murang'a notices brown spots curling her tomato leaves. Which prompt gets the most actionable AI diagnosis?
+          </h2>
+          <p id="questionContext" class="text-gray-300 text-sm leading-relaxed">
+            AI vision models require specific geographical, crop, and symptomatic context to eliminate false positives and give organic local remedies.
+          </p>
+        </div>
+
+        <!-- Options Container -->
+        <div id="optionsContainer" class="flex flex-col gap-3.5">
+          <!-- Populated dynamically via JS -->
+        </div>
+
+        <!-- Interactive Drag/Chip Prompt Builder -->
+        <div id="chipBuilderContainer" class="hidden bg-brandDarkSurface border border-brandTeal/30 rounded-2xl p-5">
+          <div class="text-xs font-semibold text-brandTeal uppercase tracking-wider mb-2">Assemble the Best AI Prompt</div>
+          <div id="assembledPromptDropZone" class="min-h-[56px] p-3 rounded-xl bg-brandDark border-2 border-dashed border-brandTeal/40 flex flex-wrap gap-2 items-center text-sm text-gray-300 mb-4">
+            <span class="text-gray-500 text-xs italic" id="emptyPlaceholderText">Click chips below to construct your prompt...</span>
+          </div>
+          <div class="text-xs text-gray-400 mb-2">Available Prompt Building Blocks:</div>
+          <div id="availableChips" class="flex flex-wrap gap-2">
+            <!-- Dynamic Chips -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: 3D Mascot & Proactive AI Sidekick (Span 4) -->
+      <div class="lg:col-span-4 flex flex-col gap-4">
+        
+        <!-- MASCOT CARD WITH 3D SHADED RENDER -->
+        <div class="bg-brandDarkSurface border border-brandTeal/40 rounded-3xl p-5 shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
+          
+          <!-- Background glow circle -->
+          <div class="absolute -top-12 -right-12 w-40 h-40 bg-brandAmber/15 rounded-full blur-2xl pointer-events-none"></div>
+
+          <!-- Kibo Mascot Avatar 3D Container -->
+          <div class="relative w-44 h-44 mb-3 animate-bounce-slow">
+            <div class="w-full h-full rounded-3xl overflow-hidden border-2 border-brandTeal/50 shadow-[0_10px_30px_rgba(36,158,160,0.35)] relative bg-brandDark">
+              <img src="kibo_3d.jpg" alt="Kibo 3D Mascot" class="w-full h-full object-cover object-top" />
+              <div class="absolute inset-0 bg-gradient-to-t from-brandDarkSurface/50 via-transparent to-transparent pointer-events-none"></div>
+            </div>
+
+            <!-- Proactive Notification Glow Pin -->
+            <div id="mascotGlowIndicator" class="hidden absolute -top-1 -right-1 w-6 h-6 rounded-full bg-brandAmber text-black font-bold text-xs flex items-center justify-center shadow-lg animate-bounce">
+              !
+            </div>
+          </div>
+
+          <!-- Mascot Identity -->
+          <div class="flex items-center gap-2 mb-1">
+            <h3 class="font-bold text-lg text-white">Kibo</h3>
+            <span class="text-[10px] uppercase font-bold bg-brandAmber/20 text-brandAmber px-2 py-0.5 rounded-full border border-brandAmber/30">
+              AI Tutor Sidekick
+            </span>
+          </div>
+          <p class="text-xs text-gray-400 mb-3">Your personal guide & automated mentor</p>
+
+          <!-- Dynamic Speech Bubble -->
+          <div id="mascotBubble" class="w-full bg-brandDark/90 border border-brandTeal/30 rounded-2xl p-3.5 text-xs text-gray-200 text-left relative transition-all duration-300">
+            <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-brandDark/90 border-t border-l border-brandTeal/30 rotate-45"></div>
+            <p id="mascotMessage">
+              "Hujambo! I'm watching your progress. Notice how adding local parameters helps the AI avoid generic advice!"
+            </p>
+          </div>
+
+          <!-- Proactive Help Button -->
+          <div class="w-full mt-4 flex gap-2">
+            <button onclick="requestProactiveHint()" class="flex-1 py-2 px-3 rounded-xl bg-brandTeal/20 hover:bg-brandTeal/30 border border-brandTeal/40 text-brandTeal text-xs font-semibold flex items-center justify-center gap-1.5 transition-all">
+              <i data-lucide="lightbulb" class="w-4 h-4 text-brandAmber"></i>
+              <span>Need a Hint?</span>
+            </button>
+            <button onclick="toggleSidekickChat()" class="py-2 px-3 rounded-xl bg-brandAmber/20 hover:bg-brandAmber/30 border border-brandAmber/40 text-brandAmber text-xs font-semibold flex items-center justify-center gap-1.5 transition-all">
+              <i data-lucide="message-square" class="w-4 h-4"></i>
+              <span>Ask Kibo</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Context Widget -->
+        <div class="bg-brandDarkSurface/70 border border-gray-800 rounded-2xl p-4 text-xs text-gray-400">
+          <div class="flex items-center gap-2 text-white font-medium mb-1.5">
+            <i data-lucide="compass" class="w-4 h-4 text-brandTeal"></i>
+            <span>Kenyan Context Anchor</span>
+          </div>
+          <p id="contextAnchorText">
+            Kenya has over 107,000 Community Health Promoters and 4.5 million smallholder farmers. Contextual AI transforms their daily output.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- BOTTOM ACTION DOCK -->
+    <div id="bottomBar" class="border-t border-brandTeal/20 bg-brandDarkSurface/95 backdrop-blur-md -mx-4 -mb-6 px-6 py-4 flex items-center justify-between transition-all duration-300">
+      <div id="feedbackBanner" class="hidden flex items-center gap-3">
+        <div id="feedbackIconWrapper" class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg"></div>
+        <div>
+          <div id="feedbackTitle" class="font-bold text-base"></div>
+          <div id="feedbackMessage" class="text-xs text-gray-300 max-w-md"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 ml-auto">
+        <button id="skipBtn" onclick="skipQuestion()" class="px-5 py-3 rounded-xl text-gray-400 hover:text-white font-semibold text-sm transition-colors">
+          Skip
+        </button>
+        <button id="actionBtn" onclick="evaluateAnswer()" class="px-8 py-3.5 rounded-2xl bg-brandTeal hover:bg-brandTealLight text-brandDark font-bold text-sm uppercase tracking-wider duo-button-bottom transition-all duration-150">
+          Check Answer
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ONBOARDING & PROFILE MODAL -->
+  <div id="onboardingModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-brandDarkSurface border-2 border-brandTeal/50 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+      <div class="absolute -top-16 -left-16 w-48 h-48 bg-brandTeal/20 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <div class="text-center mb-6">
+        <img src="logo.png" alt="Savanna Mind" class="h-10 mx-auto mb-3" />
+        <h2 class="text-2xl font-bold text-white">Karibu Savanna Mind Learn</h2>
+        <p class="text-sm text-gray-300 mt-1">Select your age group and daily workflow track.</p>
+      </div>
+
+      <!-- Step 1: Age Selection -->
+      <div id="onboardStep1">
+        <label class="block text-xs font-semibold uppercase tracking-wider text-brandTeal mb-3">
+          Select Your Age Group:
+        </label>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+          <div onclick="selectAgeGroup('kids', this)" class="age-card p-4 rounded-2xl bg-brandCard border-2 border-gray-700 hover:border-brandTeal cursor-pointer transition-all text-center">
+            <div class="w-10 h-10 mx-auto mb-2 rounded-xl bg-brandTeal/20 flex items-center justify-center text-brandTeal"><i data-lucide="sprout" class="w-5 h-5"></i></div>
+            <div class="font-bold text-sm text-white">8 – 12 Yrs</div>
+            <div class="text-xs text-gray-400 mt-1">Grade 3 to 6 (CBC Foundational)</div>
+          </div>
+          <div onclick="selectAgeGroup('teens', this)" class="age-card p-4 rounded-2xl bg-brandCard border-2 border-gray-700 hover:border-brandTeal cursor-pointer transition-all text-center">
+            <div class="w-10 h-10 mx-auto mb-2 rounded-xl bg-brandBlue/20 flex items-center justify-center text-brandBlue"><i data-lucide="rocket" class="w-5 h-5"></i></div>
+            <div class="font-bold text-sm text-white">13 – 17 Yrs</div>
+            <div class="text-xs text-gray-400 mt-1">JSS & High School (Logic & Ethics)</div>
+          </div>
+          <div onclick="selectAgeGroup('adults', this)" class="age-card p-4 rounded-2xl bg-brandCard border-2 border-brandTeal/80 bg-brandTeal/10 cursor-pointer transition-all text-center">
+            <div class="w-10 h-10 mx-auto mb-2 rounded-xl bg-brandAmber/20 flex items-center justify-center text-brandAmber"><i data-lucide="briefcase" class="w-5 h-5"></i></div>
+            <div class="font-bold text-sm text-white">18+ Adults</div>
+            <div class="text-xs text-brandTeal mt-1">Career & Industry Specialization</div>
+          </div>
+        </div>
+
+        <!-- Step 2: Career / Sector (Shown if 18+) -->
+        <div id="careerSection" class="transition-all duration-300">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-brandAmber mb-3">
+            Choose Your Daily Career Track (Kenyan Focus):
+          </label>
+          <div class="grid grid-cols-2 gap-2.5 mb-6 max-h-48 overflow-y-auto pr-1">
+            <div onclick="selectCareer('agri', this)" class="career-card p-3 rounded-xl bg-brandCard border-2 border-brandAmber/80 bg-brandAmber/10 cursor-pointer text-left text-xs">
+              <span class="font-bold text-white flex items-center gap-1.5"><i data-lucide="wheat" class="w-3.5 h-3.5 text-brandAmber"></i> Farming & Agribusiness</span>
+              <span class="text-gray-400 text-[11px] block mt-0.5">Crop vision, weather prompts, market sales</span>
+            </div>
+            <div onclick="selectCareer('health', this)" class="career-card p-3 rounded-xl bg-brandCard border-2 border-gray-700 hover:border-brandAmber cursor-pointer text-left text-xs">
+              <span class="font-bold text-white flex items-center gap-1.5"><i data-lucide="stethoscope" class="w-3.5 h-3.5 text-brandTeal"></i> Healthcare & CHPs</span>
+              <span class="text-gray-400 text-[11px] block mt-0.5">TB triage, patient history, KDPA privacy</span>
+            </div>
+            <div onclick="selectCareer('duka', this)" class="career-card p-3 rounded-xl bg-brandCard border-2 border-gray-700 hover:border-brandAmber cursor-pointer text-left text-xs">
+              <span class="font-bold text-white flex items-center gap-1.5"><i data-lucide="store" class="w-3.5 h-3.5 text-brandBlue"></i> Dukas & Micro-SMEs</span>
+              <span class="text-gray-400 text-[11px] block mt-0.5">M-Pesa cashflow, WhatsApp AI marketing</span>
+            </div>
+            <div onclick="selectCareer('education', this)" class="career-card p-3 rounded-xl bg-brandCard border-2 border-gray-700 hover:border-brandAmber cursor-pointer text-left text-xs">
+              <span class="font-bold text-white flex items-center gap-1.5"><i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-emerald-400"></i> Education & Teachers</span>
+              <span class="text-gray-400 text-[11px] block mt-0.5">CBC lesson plans, quiz rubrics, plagiarism</span>
+            </div>
+            <div onclick="selectCareer('tech', this)" class="career-card p-3 rounded-xl bg-brandCard border-2 border-gray-700 hover:border-brandAmber cursor-pointer text-left text-xs">
+              <span class="font-bold text-white flex items-center gap-1.5"><i data-lucide="terminal" class="w-3.5 h-3.5 text-cyan-400"></i> Tech & Cloud Systems</span>
+              <span class="text-gray-400 text-[11px] block mt-0.5">LLM APIs, low-resource Swahili NLP</span>
+            </div>
+            <div onclick="selectCareer('creative', this)" class="career-card p-3 rounded-xl bg-brandCard border-2 border-gray-700 hover:border-brandAmber cursor-pointer text-left text-xs">
+              <span class="font-bold text-white flex items-center gap-1.5"><i data-lucide="palette" class="w-3.5 h-3.5 text-purple-400"></i> Creative Media & Sheng</span>
+              <span class="text-gray-400 text-[11px] block mt-0.5">Content generation, local branding, video</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Confirm Button -->
+        <button onclick="startPersonalizedPath()" class="w-full py-4 rounded-2xl bg-brandAmber hover:bg-brandAmberDark text-brandDark font-bold text-sm uppercase tracking-wider duo-amber-bottom transition-all">
+          Launch My Customized Track ➔
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- KIBO AI TUTOR SIDE DRAWER (Interactive Live Chat) -->
+  <div id="tutorDrawer" class="fixed inset-y-0 right-0 max-w-md w-full bg-brandDarkSurface border-l border-brandTeal/30 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
+    <!-- Drawer Header -->
+    <div class="p-4 border-b border-brandTeal/20 flex items-center justify-between bg-brandDark/80">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-brandAmber/20 border border-brandAmber/40 flex items-center justify-center">
+          <i data-lucide="sparkles" class="w-5 h-5 text-brandAmber"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-white text-sm">Ask Kibo Tutor</h3>
+          <span class="text-[11px] text-brandTeal flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Online AI Engine (Gemini Powered)
+          </span>
+        </div>
+      </div>
+      <button onclick="toggleSidekickChat()" class="p-2 text-gray-400 hover:text-white rounded-lg">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Language Selector Bar -->
+    <div class="px-4 py-2 bg-brandDark border-b border-gray-800 flex items-center justify-between text-xs">
+      <span class="text-gray-400">Response dialect:</span>
+      <div class="flex gap-2">
+        <button onclick="setDialect('english', this)" class="dialect-btn px-2.5 py-1 rounded-full bg-brandTeal text-brandDark font-bold">English</button>
+        <button onclick="setDialect('swahili', this)" class="dialect-btn px-2.5 py-1 rounded-full bg-gray-800 text-gray-300 hover:text-white">Kiswahili</button>
+        <button onclick="setDialect('sheng', this)" class="dialect-btn px-2.5 py-1 rounded-full bg-gray-800 text-gray-300 hover:text-white">Sheng</button>
+      </div>
+    </div>
+
+    <!-- Messages Container -->
+    <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 text-xs leading-relaxed">
+      <!-- Bot Message -->
+      <div class="flex items-start gap-2.5">
+        <div class="w-7 h-7 rounded-full bg-brandAmber/20 border border-brandAmber/40 flex items-center justify-center shrink-0 text-brandAmber"><i data-lucide="bot" class="w-4 h-4"></i></div>
+        <div class="bg-brandCard border border-brandTeal/20 p-3 rounded-2xl rounded-tl-none text-gray-200">
+          Sasa! I am Kibo, your Savanna Mind companion. Ask me anything about how AI connects to Kenyan business, farming, or daily life!
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Chips -->
+    <div class="px-4 py-2 border-t border-gray-800 flex gap-2 overflow-x-auto text-[11px] text-gray-300 whitespace-nowrap">
+      <button onclick="sendQuickPrompt('Explain this tomato question in simple terms')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-brandTeal/20 border border-gray-700">Tomato Prompt Help</button>
+      <button onclick="sendQuickPrompt('How do M-Pesa statements work with AI?')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-brandTeal/20 border border-gray-700">M-Pesa & AI</button>
+      <button onclick="sendQuickPrompt('Niambie kwa Kiswahili jinsi AI inavyofanya kazi')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-brandTeal/20 border border-gray-700">Swahili Explainer</button>
+    </div>
+
+    <!-- Input Box -->
+    <div class="p-4 border-t border-brandTeal/20 bg-brandDark/90 flex gap-2">
+      <input id="chatInput" type="text" placeholder="Uliza Kibo swali lolote..." onkeydown="if(event.key==='Enter') sendChatMessage()" class="flex-1 bg-brandDark border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brandTeal" />
+      <button onclick="sendChatMessage()" class="p-2.5 rounded-xl bg-brandTeal text-brandDark hover:bg-brandTealLight">
+        <i data-lucide="send" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- LESSON COMPLETED CELEBRATION MODAL -->
+  <div id="congratsModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-brandDarkSurface border-2 border-brandAmber rounded-3xl max-w-md w-full p-6 sm:p-8 text-center shadow-2xl relative overflow-hidden">
+      <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-brandAmber/20 border border-brandAmber/40 flex items-center justify-center text-brandAmber animate-bounce"><i data-lucide="award" class="w-8 h-8"></i></div>
+      <h2 class="text-2xl font-bold text-white mb-1">Module Completed!</h2>
+      <p class="text-xs text-brandAmber font-semibold uppercase tracking-widest mb-4">Savanna Mind Certification Pathway</p>
+      
+      <div class="bg-brandCard border border-brandTeal/30 rounded-2xl p-4 mb-5 text-left text-xs space-y-2">
+        <div class="flex justify-between text-gray-300">
+          <span>Track Completed:</span>
+          <span id="completedTrackLabel" class="font-bold text-brandTeal">Farming & Agribusiness AI</span>
+        </div>
+        <div class="flex justify-between text-gray-300">
+          <span>XP Gained:</span>
+          <span class="font-bold text-yellow-400">+150 XP</span>
+        </div>
+        <div class="flex justify-between text-gray-300">
+          <span>Streak Status:</span>
+          <span class="font-bold text-brandAmber">Active: 6 Days Streak</span>
+        </div>
+        <div class="flex justify-between text-gray-300">
+          <span>Certificate Status:</span>
+          <span class="font-bold text-emerald-400">Verified on Savanna Chain</span>
+        </div>
+      </div>
+
+      <button onclick="restartOnboarding()" class="w-full py-3.5 rounded-xl bg-brandTeal hover:bg-brandTealLight text-brandDark font-bold text-xs uppercase tracking-wider duo-button-bottom">
+        Continue to Next Module ➔
+      </button>
+    </div>
+  </div>
+
+  <!-- SOUND SYNTHESIS & CORE JAVASCRIPT -->
+  <script>
+    const AudioEngine = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+      },
+      playSuccess() {
+        this.init();
+        const ctx = this.ctx;
+        const now = ctx.currentTime;
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc1.type = 'triangle';
+        osc2.type = 'sine';
+
+        osc1.frequency.setValueAtTime(523.25, now);
+        osc1.frequency.setValueAtTime(659.25, now + 0.1);
+        osc1.frequency.setValueAtTime(783.99, now + 0.2);
+        osc1.frequency.setValueAtTime(1046.50, now + 0.3);
+
+        osc2.frequency.setValueAtTime(261.63, now);
+        osc2.frequency.setValueAtTime(523.25, now + 0.3);
+
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.6);
+        osc2.stop(now + 0.6);
+      },
+      playMistake() {
+        this.init();
+        const ctx = this.ctx;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.setValueAtTime(160, now + 0.15);
+
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.35);
+      },
+      playNudge() {
+        this.init();
+        const ctx = this.ctx;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.18);
+
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.3);
+      }
+    };
+
+    const curriculum = {
+      agri: [
+        {
+          type: 'multiple-choice',
+          title: "Mama Jane in Murang'a notices brown spots curling her tomato leaves. Which prompt gets the most actionable AI diagnosis?",
+          context: "AI vision models require specific geographical, crop, and symptomatic context to eliminate false positives and give organic local remedies.",
+          scenario: "Farming & Agribusiness AI",
+          anchor: "Kenya's Murang'a county is a high-density horticulture zone. Contextual prompt engineering prevents pesticide misapplication.",
+          options: [
+            { text: "What is wrong with my plant? Fix it.", correct: false, reason: "Too generic. The AI has zero context on crop species, region, or symptoms." },
+            { text: "Analyze this photo of a tomato leaf in Murang'a showing circular brown spots with concentric rings; identify likely fungal causes (e.g. Early Blight) and list three eco-friendly remedies available in Kenya.", correct: true, reason: "Excellent! Specifies crop, location, distinct visual symptoms, and requests safe, locally accessible solutions." },
+            { text: "Is this leaf dead or alive? Give me a percentage score.", correct: false, reason: "Unhelpful framing; does not ask for diagnostic etiology or farm treatment." }
+          ],
+          hint: "Think about what an agronomist at KALRO would ask: Where is the farm? What crop? What do the lesions look like?"
+        },
+        {
+          type: 'chips',
+          title: "Assemble an AI Prompt to draft an automated WhatsApp weather warning for tea plucking farmers in Kericho:",
+          context: "Click the chips in logical sequence to create an optimal prompt structure: [Role] + [Context] + [Instruction].",
+          scenario: "Farming & Agribusiness AI",
+          anchor: "Kericho tea farmers lose revenue if plucking occurs right before severe unforecasted hail storms.",
+          correctOrder: [
+            "Act as an expert agricultural meteorologist in Kenya.",
+            "Review rainfall data from Kenya Met for Kericho.",
+            "Draft a 2-sentence Swahili WhatsApp alert warning tea farmers of 3 PM hail."
+          ],
+          availableChips: [
+            "Act as an expert agricultural meteorologist in Kenya.",
+            "Write a poem about rain.",
+            "Review rainfall data from Kenya Met for Kericho.",
+            "Draft a 2-sentence Swahili WhatsApp alert warning tea farmers of 3 PM hail.",
+            "Calculate coffee prices in USD."
+          ],
+          hint: "Start with who the AI should pretend to be (Role), then provide the local data source (Context), then the communication format (Instruction)."
+        },
+        {
+          type: 'multiple-choice',
+          title: "A smallholder maize farmer in Eldoret is quoted KES 1,800 per bag by a broker. How can AI help them verify fair market prices?",
+          context: "Intermediary price asymmetry often leaves Kenyan farmers undercompensated for harvests.",
+          scenario: "Market Intelligence AI",
+          anchor: "Eldoret grain silos and Nairobi Wakulima market fluctuate weekly; AI can synthesize wholesale trends instantly.",
+          options: [
+            { text: "Prompt an AI agent connected to daily KNBS and Wakulima wholesale market prices to compare Eldoret farmgate rates vs retail.", correct: true, reason: "Safi sana! Real-time regional price comparison empowers the farmer to negotiate with brokers or pool transport." },
+            { text: "Ask AI to guarantee tomorrow's stock price on Wall Street.", correct: false, reason: "Irrelevant to local maize price parity in Uasin Gishu." },
+            { text: "Rely solely on word of mouth from the village center.", correct: false, reason: "Misses the transformative leverage of digital market intelligence." }
+          ],
+          hint: "The best AI workflows connect official Kenyan agricultural pricing databases to direct conversational SMS/WhatsApp queries."
+        }
+      ],
+      health: [
+        {
+          type: 'multiple-choice',
+          title: "A Community Health Promoter (CHP) in Machakos is recording household vitals for an elder with persistent cough. How should they prompt speech AI?",
+          context: "Savanna Mind CHAI Flagship: Empowering 107,000 CHPs across Kenya with privacy-first automated triage.",
+          scenario: "Healthcare & CHPs (CHAI Flagship)",
+          anchor: "Kenyan Data Protection Act (KDPA) 2019 mandates de-identification of patient identities during cloud AI processing.",
+          options: [
+            { text: "Upload the patient's full national ID, name, and phone number with audio of their cough to an unencrypted public chatbot.", correct: false, reason: "Dangerous violation of patient confidentiality and Kenya's Data Protection Act." },
+            { text: "Dictate symptoms using anonymized identifier (CHP-MKS-042), 3-week cough duration, night sweats, and request TB triage risk score based on Ministry of Health guidelines.", correct: true, reason: "Spot on! Protects patient privacy while rigorously checking symptoms against MoH clinical protocols." },
+            { text: "Ask AI to diagnose the disease and prescribe prescription antibiotics immediately without a clinician.", correct: false, reason: "AI assists triage; it never replaces licensed medical prescription." }
+          ],
+          hint: "Remember: Never feed personal PII (names, ID numbers) into public AI models, and always follow Ministry of Health protocols!"
+        }
+      ],
+      kids: [
+        {
+          type: 'multiple-choice',
+          title: "You are training a friendly robot at Nairobi City Market! How does the robot learn the difference between a ripe mango and a green avocado?",
+          context: "CBC Grade 4 Science & Tech: Machines learn patterns from examples, just like children learn from pictures.",
+          scenario: "Young Explorers (Ages 8-12)",
+          anchor: "Learning pattern recognition with Kenyan tropical fruits.",
+          options: [
+            { text: "We show the robot hundreds of photos of yellow mangoes and bumpy green avocados so it discovers the color and shape patterns.", correct: true, reason: "Hongera! That is called 'Machine Learning' — the computer learns from examples!" },
+            { text: "We tell the robot a fairy tale about a fruit tree.", correct: false, reason: "Robots need data and clear image examples, not fairy tales!" },
+            { text: "The robot magically already knows every fruit in Africa.", correct: false, reason: "Robots are not magic; people have to teach them with data!" }
+          ],
+          hint: "How did you learn what a mango looks like? By seeing lots of mangoes!"
+        }
+      ],
+      teens: [
+        {
+          type: 'multiple-choice',
+          title: "You see a viral TikTok video claiming Nairobi will experience snowfall next week. How do you use AI to fact-check it?",
+          context: "Digital Literacy & Ethical AI for Junior & Senior Secondary students.",
+          scenario: "Teen Innovators (Ages 13-17)",
+          anchor: "Combatting deepfakes and algorithmic misinformation on Kenyan social media.",
+          options: [
+            { text: "Use a reverse image/video analysis AI to trace the source footage and cross-verify with Kenya Meteorological Department official feeds.", correct: true, reason: "Brilliant! AI tools can detect cloned voices, synthetic weather clips, and check credible meteorological sources." },
+            { text: "Forward it to all your WhatsApp groups to see if your friends believe it.", correct: false, reason: "That just spreads potential fake news faster!" },
+            { text: "Believe it because if it is on the internet, it must be real.", correct: false, reason: "Always critically verify digital media with AI verification tools!" }
+          ],
+          hint: "Look for the original publisher and check against trusted Kenyan institutions like Kenya Met."
+        }
+      ],
+      duka: [
+        {
+          type: 'multiple-choice',
+          title: "Wanjiku runs a boutique at Gikomba. Customers constantly message on WhatsApp asking: 'Uko wapi?', 'Bei ni ngapi?', and sending M-Pesa receipts. How does AI automate this?",
+          context: "Micro-SME Workflow: Transforming conversational WhatsApp commerce into a 24/7 automated sales channel.",
+          scenario: "Dukas & Jua Kali SMEs",
+          anchor: "Over 80% of urban micro-commerce in Nairobi flows through WhatsApp and M-Pesa.",
+          options: [
+            { text: "Deploy an AI assistant configured with her price sheet and pickup directions that instantly parses incoming M-Pesa confirmation SMS codes.", correct: true, reason: "Superb! It verifies transaction codes, updates stock, and gives immediate friendly replies in Sheng or Swahili." },
+            { text: "Tell all customers to stop using WhatsApp and only visit in person.", correct: false, reason: "That loses high-margin digital customers!" },
+            { text: "Hire three extra full-time staff just to type the location address repeatedly.", correct: false, reason: "High overhead cost when AI can answer FAQs instantly for pennies." }
+          ],
+          hint: "The AI acts like an untiring virtual shopkeeper who never sleeps and knows every price tag."
+        }
+      ]
+    };
+
+    let currentAge = 'adults';
+    let currentTrack = 'agri';
+    let currentQuestionIndex = 0;
+    let selectedOptionIndex = null;
+    let assembledChips = [];
+    let streak = 5;
+    let xp = 420;
+    let hearts = 3;
+    let idleSeconds = 0;
+    let idleTimer = null;
+    let proactiveHintShown = false;
+    let currentDialect = 'english';
+
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      loadQuestion();
+      startInactivityWatcher();
+    });
+
+    function startInactivityWatcher() {
+      if (idleTimer) clearInterval(idleTimer);
+      idleSeconds = 0;
+      proactiveHintShown = false;
+      document.getElementById('mascotGlowIndicator').classList.add('hidden');
+
+      idleTimer = setInterval(() => {
+        idleSeconds++;
+        if (idleSeconds >= 14 && !proactiveHintShown) {
+          proactiveHintShown = true;
+          triggerMascotProactiveHelp();
+        }
+      }, 1000);
+    }
+
+    function resetInactivity() {
+      idleSeconds = 0;
+    }
+
+    function triggerMascotProactiveHelp() {
+      AudioEngine.playNudge();
+      const glow = document.getElementById('mascotGlowIndicator');
+      glow.classList.remove('hidden');
+
+      const bubble = document.getElementById('mascotBubble');
+      const msg = document.getElementById('mascotMessage');
+
+      bubble.classList.add('ring-2', 'ring-brandAmber');
+      msg.innerHTML = `<strong>Kibo noticing hesitation:</strong> "Hujambo! Notice how prompt detail changes everything? Tap <em>Need a Hint?</em> if you want a clue!"`;
+    }
+
+    function requestProactiveHint() {
+      resetInactivity();
+      const q = getCurrentQuestion();
+      const msg = document.getElementById('mascotMessage');
+      const bubble = document.getElementById('mascotBubble');
+      
+      AudioEngine.playNudge();
+      bubble.classList.add('ring-2', 'ring-brandTeal');
+      msg.innerHTML = `<i data-lucide="lightbulb" class="w-4 h-4 inline text-brandAmber"></i> <strong>Kibo's Clue:</strong> "${q.hint}"`;
+      lucide.createIcons();
+    }
+
+    function getCurrentQuestionsList() {
+      return curriculum[currentTrack] || curriculum['agri'];
+    }
+
+    function getCurrentQuestion() {
+      const list = getCurrentQuestionsList();
+      return list[currentQuestionIndex % list.length];
+    }
+
+    function loadQuestion() {
+      startInactivityWatcher();
+      selectedOptionIndex = null;
+      assembledChips = [];
+
+      const q = getCurrentQuestion();
+      const total = getCurrentQuestionsList().length;
+
+      document.getElementById('lessonStepIndicator').textContent = `Challenge ${currentQuestionIndex + 1} of ${total}`;
+      const percent = Math.round(((currentQuestionIndex + 1) / total) * 100);
+      document.getElementById('progressBar').style.width = `${percent}%`;
+
+      document.getElementById('scenarioBadge').textContent = q.scenario;
+      document.getElementById('questionTitle').textContent = q.title;
+      document.getElementById('questionContext').textContent = q.context;
+      document.getElementById('contextAnchorText').textContent = q.anchor;
+
+      document.getElementById('feedbackBanner').classList.add('hidden');
+      const actionBtn = document.getElementById('actionBtn');
+      actionBtn.textContent = "Check Answer";
+      actionBtn.className = "px-8 py-3.5 rounded-2xl bg-brandTeal hover:bg-brandTealLight text-brandDark font-bold text-sm uppercase tracking-wider duo-button-bottom transition-all";
+      actionBtn.onclick = evaluateAnswer;
+
+      const optionsBox = document.getElementById('optionsContainer');
+      const chipBox = document.getElementById('chipBuilderContainer');
+
+      if (q.type === 'multiple-choice') {
+        optionsBox.classList.remove('hidden');
+        chipBox.classList.add('hidden');
+        renderOptions(q.options);
+      } else if (q.type === 'chips') {
+        optionsBox.classList.add('hidden');
+        chipBox.classList.remove('hidden');
+        renderChips(q.availableChips);
+      }
+
+      document.getElementById('mascotBubble').classList.remove('ring-2', 'ring-brandAmber', 'ring-brandTeal');
+      document.getElementById('mascotMessage').innerHTML = `"Read carefully! Think how you would explain this scenario in a real Kenyan workspace."`;
+      lucide.createIcons();
+    }
+
+    function renderOptions(options) {
+      const container = document.getElementById('optionsContainer');
+      container.innerHTML = '';
+
+      options.forEach((opt, idx) => {
+        const div = document.createElement('div');
+        div.className = "option-card flex items-start gap-4 p-4 rounded-2xl bg-brandCard border-2 border-gray-700 hover:border-brandTeal/60 cursor-pointer transition-all duration-150";
+        div.onclick = () => selectOption(idx, div);
+
+        div.innerHTML = `
+          <div class="option-pill w-7 h-7 rounded-full bg-brandDark border border-gray-600 flex items-center justify-center font-bold text-xs text-gray-300 shrink-0 mt-0.5">
+            ${String.fromCharCode(65 + idx)}
+          </div>
+          <div class="flex-1 text-sm text-gray-200 leading-relaxed font-medium">
+            ${opt.text}
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function selectOption(idx, elem) {
+      resetInactivity();
+      selectedOptionIndex = idx;
+      document.querySelectorAll('.option-card').forEach(el => {
+        el.classList.remove('border-brandTeal', 'bg-brandTeal/15');
+        el.querySelector('.option-pill').classList.remove('bg-brandTeal', 'text-brandDark', 'border-brandTeal');
+      });
+
+      elem.classList.add('border-brandTeal', 'bg-brandTeal/15');
+      const pill = elem.querySelector('.option-pill');
+      pill.classList.add('bg-brandTeal', 'text-brandDark', 'border-brandTeal');
+    }
+
+    function renderChips(chips) {
+      const dropZone = document.getElementById('assembledPromptDropZone');
+      dropZone.innerHTML = `<span class="text-gray-500 text-xs italic" id="emptyPlaceholderText">Click chips below to construct your prompt...</span>`;
+
+      const availableContainer = document.getElementById('availableChips');
+      availableContainer.innerHTML = '';
+
+      chips.forEach((text) => {
+        const btn = document.createElement('button');
+        btn.className = "prompt-chip px-3 py-2 rounded-xl bg-brandCard hover:bg-brandTeal/20 border border-gray-700 text-xs text-gray-200 transition-all";
+        btn.textContent = text;
+        btn.onclick = () => toggleChip(text, btn);
+        availableContainer.appendChild(btn);
+      });
+    }
+
+    function toggleChip(text, btnElem) {
+      resetInactivity();
+      const dropZone = document.getElementById('assembledPromptDropZone');
+      const placeholder = document.getElementById('emptyPlaceholderText');
+      if (placeholder) placeholder.remove();
+
+      if (assembledChips.includes(text)) {
+        assembledChips = assembledChips.filter(c => c !== text);
+        btnElem.classList.remove('opacity-40', 'pointer-events-none');
+      } else {
+        assembledChips.push(text);
+        btnElem.classList.add('opacity-40', 'pointer-events-none');
+      }
+
+      dropZone.innerHTML = '';
+      if (assembledChips.length === 0) {
+        dropZone.innerHTML = `<span class="text-gray-500 text-xs italic" id="emptyPlaceholderText">Click chips below to construct your prompt...</span>`;
+      } else {
+        assembledChips.forEach((chipText) => {
+          const chip = document.createElement('span');
+          chip.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brandTeal text-brandDark font-semibold text-xs";
+          chip.innerHTML = `${chipText} <i data-lucide="x" class="w-3 h-3 cursor-pointer" onclick="removeSpecificChip('${chipText.replace(/'/g, "\\'")}')"></i>`;
+          dropZone.appendChild(chip);
+        });
+        lucide.createIcons();
+      }
+    }
+
+    function removeSpecificChip(text) {
+      resetInactivity();
+      assembledChips = assembledChips.filter(c => c !== text);
+      document.querySelectorAll('.prompt-chip').forEach(btn => {
+        if (btn.textContent === text) {
+          btn.classList.remove('opacity-40', 'pointer-events-none');
+        }
+      });
+      const dropZone = document.getElementById('assembledPromptDropZone');
+      dropZone.innerHTML = '';
+      if (assembledChips.length === 0) {
+        dropZone.innerHTML = `<span class="text-gray-500 text-xs italic" id="emptyPlaceholderText">Click chips below to construct your prompt...</span>`;
+      } else {
+        assembledChips.forEach(chipText => {
+          const chip = document.createElement('span');
+          chip.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brandTeal text-brandDark font-semibold text-xs";
+          chip.innerHTML = `${chipText} <i data-lucide="x" class="w-3 h-3 cursor-pointer" onclick="removeSpecificChip('${chipText.replace(/'/g, "\\'")}')"></i>`;
+          dropZone.appendChild(chip);
+        });
+        lucide.createIcons();
+      }
+    }
+
+    function evaluateAnswer() {
+      resetInactivity();
+      const q = getCurrentQuestion();
+      let isCorrect = false;
+      let explanation = "";
+
+      if (q.type === 'multiple-choice') {
+        if (selectedOptionIndex === null) {
+          alert("Tafadhali chagua jibu kwanza (Please select an answer first)!");
+          return;
+        }
+        const opt = q.options[selectedOptionIndex];
+        isCorrect = opt.correct;
+        explanation = opt.reason;
+      } else if (q.type === 'chips') {
+        if (assembledChips.length === 0) {
+          alert("Click on the chips to build the prompt sequence!");
+          return;
+        }
+        isCorrect = JSON.stringify(assembledChips) === JSON.stringify(q.correctOrder);
+        explanation = isCorrect 
+          ? "Spot on sequence! [Role: Meteorologist] + [Context: Kenya Met data] + [Instruction: Swahili WhatsApp alert]." 
+          : "Not quite the right sequence. In prompt engineering, establish the Persona first, provide Data Context, then specify Output format.";
+      }
+
+      const banner = document.getElementById('feedbackBanner');
+      const iconWrap = document.getElementById('feedbackIconWrapper');
+      const title = document.getElementById('feedbackTitle');
+      const msg = document.getElementById('feedbackMessage');
+      const actionBtn = document.getElementById('actionBtn');
+      const bottomBar = document.getElementById('bottomBar');
+
+      banner.classList.remove('hidden');
+
+      if (isCorrect) {
+        AudioEngine.playSuccess();
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.8 },
+          colors: ['#249EA0', '#FAAB36', '#FFFFFF']
+        });
+
+        xp += 40;
+        document.getElementById('xpCount').textContent = xp;
+
+        bottomBar.className = "border-t border-emerald-500 bg-emerald-950/90 backdrop-blur-md -mx-4 -mb-6 px-6 py-4 flex items-center justify-between";
+        iconWrap.className = "w-10 h-10 rounded-full bg-emerald-500 text-black flex items-center justify-center font-bold text-lg";
+        iconWrap.innerHTML = "✓";
+        title.className = "font-bold text-base text-emerald-400";
+        title.textContent = "Hongera! (Spot On!)";
+        msg.textContent = explanation;
+
+        document.getElementById('mascotMessage').innerHTML = `"Safi sana! You nailed the Kenyan context here. Keep going!"`;
+        actionBtn.textContent = "Continue ➔";
+        actionBtn.className = "px-8 py-3.5 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-black font-bold text-sm uppercase tracking-wider duo-button-bottom";
+        actionBtn.onclick = nextQuestion;
+      } else {
+        AudioEngine.playMistake();
+        hearts = Math.max(0, hearts - 1);
+        document.getElementById('heartsCount').textContent = hearts;
+
+        bottomBar.className = "border-t border-red-500 bg-red-950/90 backdrop-blur-md -mx-4 -mb-6 px-6 py-4 flex items-center justify-between";
+        iconWrap.className = "w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center font-bold text-lg";
+        iconWrap.innerHTML = "✕";
+        title.className = "font-bold text-base text-red-400";
+        title.textContent = "Correct Solution:";
+        msg.textContent = explanation;
+
+        document.getElementById('mascotMessage').innerHTML = `"Usijali (Don't worry)! Learning AI is an iterative process. Check the hint for next time!"`;
+        actionBtn.textContent = "Got It ➔";
+        actionBtn.className = "px-8 py-3.5 rounded-2xl bg-red-500 hover:bg-red-400 text-white font-bold text-sm uppercase tracking-wider duo-button-bottom";
+        actionBtn.onclick = nextQuestion;
+      }
+    }
+
+    function nextQuestion() {
+      const list = getCurrentQuestionsList();
+      if (currentQuestionIndex + 1 < list.length) {
+        currentQuestionIndex++;
+        loadQuestion();
+      } else {
+        showCelebrationModal();
+      }
+    }
+
+    function skipQuestion() {
+      nextQuestion();
+    }
+
+    function showCelebrationModal() {
+      AudioEngine.playSuccess();
+      confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+      document.getElementById('completedTrackLabel').textContent = document.getElementById('headerTrackName').textContent;
+      document.getElementById('congratsModal').classList.remove('hidden');
+    }
+
+    function openOnboardingModal() {
+      document.getElementById('onboardingModal').classList.remove('hidden');
+    }
+
+    function restartOnboarding() {
+      document.getElementById('congratsModal').classList.add('hidden');
+      document.getElementById('onboardingModal').classList.remove('hidden');
+      currentQuestionIndex = 0;
+    }
+
+    function selectAgeGroup(age, elem) {
+      currentAge = age;
+      document.querySelectorAll('.age-card').forEach(c => {
+        c.className = "age-card p-4 rounded-2xl bg-brandCard border-2 border-gray-700 hover:border-brandTeal cursor-pointer transition-all text-center";
+      });
+      elem.className = "age-card p-4 rounded-2xl bg-brandCard border-2 border-brandTeal bg-brandTeal/15 cursor-pointer transition-all text-center";
+
+      const careerSec = document.getElementById('careerSection');
+      if (age === 'adults') {
+        careerSec.classList.remove('hidden');
+      } else {
+        careerSec.classList.add('hidden');
+      }
+    }
+
+    function selectCareer(trackKey, elem) {
+      currentTrack = trackKey;
+      document.querySelectorAll('.career-card').forEach(c => {
+        c.className = "career-card p-3 rounded-xl bg-brandCard border-2 border-gray-700 hover:border-brandAmber cursor-pointer text-left text-xs";
+      });
+      elem.className = "career-card p-3 rounded-xl bg-brandCard border-2 border-brandAmber bg-brandAmber/15 cursor-pointer text-left text-xs";
+    }
+
+    function startPersonalizedPath() {
+      document.getElementById('onboardingModal').classList.add('hidden');
+      
+      let trackLabel = "Agri-AI (18+)";
+      if (currentAge === 'kids') {
+        currentTrack = 'kids';
+        trackLabel = "Young Explorers (8-12)";
+      } else if (currentAge === 'teens') {
+        currentTrack = 'teens';
+        trackLabel = "Teen Innovators (13-17)";
+      } else {
+        const labels = {
+          agri: "Farming & Agri (18+)",
+          health: "Healthcare & CHPs (18+)",
+          duka: "Dukas & Micro-SME (18+)",
+          education: "CBC Teachers (18+)",
+          tech: "Tech & Cloud (18+)",
+          creative: "Creative Media (18+)"
+        };
+        trackLabel = labels[currentTrack] || "General AI (18+)";
+      }
+
+      document.getElementById('headerTrackName').textContent = trackLabel;
+      document.getElementById('lessonCategoryText').textContent = `Track: ${trackLabel}`;
+      currentQuestionIndex = 0;
+      loadQuestion();
+    }
+
+    function toggleSidekickChat() {
+      const drawer = document.getElementById('tutorDrawer');
+      drawer.classList.toggle('translate-x-full');
+    }
+
+    function setDialect(dialect, btnElem) {
+      currentDialect = dialect;
+      document.querySelectorAll('.dialect-btn').forEach(b => {
+        b.className = "dialect-btn px-2.5 py-1 rounded-full bg-gray-800 text-gray-300 hover:text-white";
+      });
+      btnElem.className = "dialect-btn px-2.5 py-1 rounded-full bg-brandTeal text-brandDark font-bold";
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const val = input.value.trim();
+      if (!val) return;
+      input.value = '';
+      postUserAndReply(val);
+    }
+
+    function sendQuickPrompt(promptText) {
+      postUserAndReply(promptText);
+    }
+
+    function postUserAndReply(text) {
+      const container = document.getElementById('chatMessages');
+
+      const userDiv = document.createElement('div');
+      userDiv.className = "flex items-start justify-end gap-2";
+      userDiv.innerHTML = `
+        <div class="bg-brandTeal text-brandDark font-medium p-3 rounded-2xl rounded-tr-none max-w-[80%]">
+          ${text}
+        </div>
+      `;
+      container.appendChild(userDiv);
+      container.scrollTop = container.scrollHeight;
+
+      setTimeout(() => {
+        let reply = "";
+        if (currentDialect === 'swahili') {
+          reply = `Habari! Katika muktadha wa Kenya, AI inafanya kazi kama msaidizi wa haraka sana. Kwa mfano, inachambua picha za majani au jumbe za M-Pesa kwa sekunde chache ili uweze kuokoa muda na fedha!`;
+        } else if (currentDialect === 'sheng') {
+          reply = `Form ni gani! AI inakusaidia ku-automate ma-tasks za kila siku—kama ku-reply wateja kwa WhatsApp au ku-calculate faida ya duka bila stress!`;
+        } else {
+          reply = `Great inquiry! In practical workflows across Africa, AI acts as a force-multiplier. Whether triaging symptoms in a rural clinic or parsing M-Pesa CSVs for cashflow predictions, high context yields high precision.`;
+        }
+
+        const botDiv = document.createElement('div');
+        botDiv.className = "flex items-start gap-2.5";
+        botDiv.innerHTML = `
+          <div class="w-7 h-7 rounded-full bg-brandAmber/20 border border-brandAmber/40 flex items-center justify-center shrink-0 text-brandAmber"><i data-lucide="bot" class="w-4 h-4"></i></div>
+          <div class="bg-brandCard border border-brandTeal/30 p-3 rounded-2xl rounded-tl-none text-gray-200 max-w-[85%]">
+            ${reply}
+          </div>
+        `;
+        container.appendChild(botDiv);
+        container.scrollTop = container.scrollHeight;
+        lucide.createIcons();
+        AudioEngine.playNudge();
+      }, 700);
+    }
+  </script>
+</body>
+</html>

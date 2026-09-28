@@ -26,11 +26,15 @@
 
 body.learn-studio-route .site-header,
 body.learn-studio-route .site-footer,
-body.learn-studio-route .skip-link {
-  display: none;
+body.learn-studio-route .skip-link,
+body.auth-route .site-header,
+body.auth-route .site-footer,
+body.auth-route .skip-link {
+  display: none !important;
 }
 
-body.learn-studio-route .site-shell {
+body.learn-studio-route .site-shell,
+body.auth-route .site-shell {
   max-width: none;
   padding: 0;
 }

@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "onboardingCopy": {
+    "kids": { "careerPrompt": "What is your dream job?" },
+    "youth": { "careerPrompt": "What is your preferred career path?" },
+    "adult": { "careerPrompt": "What is your current career path?" }
+  },
+  "careers": [
+    { "id": "farmer", "modulePriority": "agr", "labels": { "kids": "Farmer or grower", "youth": "Agriculture & farming", "adult": "Farmer / smallholder" } },
+    { "id": "livestock", "modulePriority": "agr", "labels": { "kids": "Vet or animal keeper", "youth": "Livestock & veterinary", "adult": "Livestock / veterinary services" } },
+    { "id": "agri_trader", "modulePriority": "agr", "labels": { "kids": "Market seller of food", "youth": "Agri-business & markets", "adult": "Agri-trader / market" } },
+    { "id": "health_chp", "modulePriority": "hlt", "labels": { "kids": "Community health helper", "youth": "Community health (CHP)", "adult": "CHP / community health" } },
+    { "id": "nurse", "modulePriority": "hlt", "labels": { "kids": "Nurse or doctor", "youth": "Nursing & clinical care", "adult": "Nurse / clinical officer" } },
+    { "id": "health_admin", "modulePriority": "hlt", "labels": { "kids": "Hospital or clinic worker", "youth": "Health administration", "adult": "Health administration" } },
+    { "id": "teacher_primary", "modulePriority": "edu", "labels": { "kids": "Primary school teacher", "youth": "Primary teaching", "adult": "Primary teacher" } },
+    { "id": "teacher_secondary", "modulePriority": "edu", "labels": { "kids": "Secondary school teacher", "youth": "Secondary teaching", "adult": "Secondary / TVET teacher" } },
+    { "id": "student_primary", "modulePriority": "edu", "labels": { "kids": "Primary school pupil", "youth": "Primary learner", "adult": "Parent of primary learner" } },
+    { "id": "student_secondary", "modulePriority": "edu", "labels": { "kids": "Secondary school student", "youth": "Secondary student (KCSE/CBC)", "adult": "Secondary student" } },
+    { "id": "university", "modulePriority": "edu", "labels": { "kids": "University lecturer (dream)", "youth": "University / college", "adult": "University student or lecturer" } },
+    { "id": "shop_owner", "modulePriority": "biz", "labels": { "kids": "Shop or duka owner", "youth": "Retail & duka business", "adult": "Shop / duka owner" } },
+    { "id": "hospitality", "modulePriority": "biz", "labels": { "kids": "Chef or hotel worker", "youth": "Hospitality & tourism", "adult": "Hospitality / tourism" } },
+    { "id": "transport", "modulePriority": "biz", "labels": { "kids": "Boda or driver", "youth": "Transport & logistics", "adult": "Boda / matatu / logistics" } },
+    { "id": "artisan", "modulePriority": "biz", "labels": { "kids": "Fundi or craft maker", "youth": "Jua kali / artisan", "adult": "Artisan / jua kali" } },
+    { "id": "finance", "modulePriority": "biz", "labels": { "kids": "Bank or M-Pesa agent", "youth": "Finance & M-Pesa agent", "adult": "Banking / M-Pesa agent" } },
+    { "id": "government", "modulePriority": "m0", "labels": { "kids": "Government leader", "youth": "Public service", "adult": "Government / county staff" } },
+    { "id": "ngo", "modulePriority": "cap", "labels": { "kids": "Help people in my area", "youth": "NGO & community work", "adult": "NGO / community organiser" } },
+    { "id": "tech", "modulePriority": "m0", "labels": { "kids": "Software or IT builder", "youth": "Technology & IT", "adult": "IT / software / data" } },
+    { "id": "creative", "modulePriority": "edu", "labels": { "kids": "Artist or content creator", "youth": "Media & creative", "adult": "Media / creative" } },
+    { "id": "legal", "modulePriority": "m0", "labels": { "kids": "Lawyer or judge", "youth": "Law & governance", "adult": "Legal practice" } },
+    { "id": "exploring", "modulePriority": "m0", "labels": { "kids": "Still exploring", "youth": "Still exploring", "adult": "Still exploring / career change" } }
+  ]
+}

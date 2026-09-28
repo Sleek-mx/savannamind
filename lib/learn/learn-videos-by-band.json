@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "rule": "At least one embedded video every two units (u1-2, u3-4, ...). Band-specific pools only.",
+  "passMarkPercent": 80,
+  "bands": {
+    "kids": {
+      "ageRange": "8-13",
+      "unitsPerModule": 9,
+      "pool": [
+        { "id": "ai_kids_inspirit", "title": "What is AI for Kids?", "youtube": "IFlllNEDbNE" },
+        { "id": "scratch_ml_rpi", "title": "Machine learning with Scratch", "youtube": "rQwJvn-noHg" },
+        { "id": "scratch_ml4k_tutorial", "title": "Text classification in Scratch (Machine Learning for Kids)", "youtube": "Nc2Kj8OepQA" },
+        { "id": "scratch_ml_intro", "title": "Machine Learning with Scratch", "youtube": "GJODcwLyYcQ" },
+        { "id": "teachable", "title": "Google Teachable Machine", "youtube": "kwcillcWOg0" },
+        { "id": "ml4k_genai_scratch", "title": "Language models in Scratch (ML4K)", "youtube": "Duw83OYcBik" }
+      ]
+    },
+    "youth": {
+      "ageRange": "14-20",
+      "unitsPerModule": 12,
+      "pool": [
+        { "id": "cc_ai_1", "title": "Crash Course AI #1 — What is AI?", "youtube": "a0_lo_GDcFw" },
+        { "id": "cc_cs_34", "title": "Crash Course CS #34 — ML & AI", "youtube": "z-EtmaFJieY" },
+        { "id": "cc_ai_3", "title": "Crash Course AI #3 — Neural networks", "youtube": "oV3ZY6tJiA0" },
+        { "id": "prompting", "title": "Prompt engineering basics", "youtube": "_ZvnD73m40o" },
+        { "id": "bias", "title": "Algorithmic bias", "youtube": "ePfY1V0wEWI" },
+        { "id": "genai_ethics", "title": "Generative AI & ethics", "youtube": "5qQQ3yzbKp4" },
+        { "id": "neural_net", "title": "But what is a neural network?", "youtube": "aircAruvnKk" }
+      ]
+    },
+    "adult": {
+      "ageRange": "21+",
+      "unitsPerModule": 18,
+      "pool": [
+        { "id": "ai_literacy_2026", "title": "AI literacy for beginners (safe use)", "youtube": "j-y4UOjAtPA" },
+        { "id": "google_ai_fundamentals", "title": "Fundamentals of AI (Google)", "youtube": "OH43A-tRm4M" },
+        { "id": "google_ai_work", "title": "Using AI for work (Google)", "youtube": "a-fmRIW8u-8" },
+        { "id": "what_is_ai", "title": "What is AI? (intro)", "youtube": "ad79nYk2keg" },
+        { "id": "kenya_digital", "title": "Kenya digital / AI context", "youtube": "RzkD_smu_sU" },
+        { "id": "prompting", "title": "Prompt engineering basics", "youtube": "_ZvnD73m40o" },
+        { "id": "genai_ethics", "title": "Generative AI & ethics", "youtube": "5qQQ3yzbKp4" },
+        { "id": "bias", "title": "Algorithmic bias", "youtube": "ePfY1V0wEWI" },
+        { "id": "neural_net", "title": "Neural networks explained", "youtube": "aircAruvnKk" }
+      ]
+    }
+  },
+  "moduleVideoSlotNote": "Unit pair (1-2) uses pool[0], (3-4) pool[1], etc. Index = floor((unitNumber-1)/2) mod pool.length"
+}

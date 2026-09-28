@@ -63,14 +63,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="site-body">
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a>
-        <div id="main-content" className="site-shell">
-          {children}
-        </div>
-      </body>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

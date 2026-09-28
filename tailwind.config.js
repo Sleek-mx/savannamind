@@ -1,10 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  important: ".learn-studio",
   content: [
-    "./app/**/learn/studio/**/*.{ts,tsx}",
-    "./components/learn/**/*.{ts,tsx}",
-    "./components/ui/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./registry/**/*.{ts,tsx}",
   ],
   corePlugins: {
     preflight: false,

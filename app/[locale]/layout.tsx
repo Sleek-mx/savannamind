@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
-  SiteFooter,
-  SiteHeader,
   isLocale,
   type Locale,
 } from "@/components/site-header";
@@ -63,13 +61,10 @@ export default function LocaleLayout({
   if (!isLocale(params.locale)) {
     notFound();
   }
-  const locale = params.locale as Locale;
 
   return (
     <>
-      <SiteHeader locale={locale} />
-      <main>{children}</main>
-      <SiteFooter locale={locale} />
+      {children}
       <script dangerouslySetInnerHTML={{ __html: langSync }} />
     </>
   );

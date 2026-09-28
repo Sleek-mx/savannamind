@@ -83,7 +83,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-neutral-900 grid grid-cols-1 lg:grid-cols-12">
+    <div className="standalone-auth min-h-screen bg-white text-neutral-900 grid grid-cols-1 lg:grid-cols-12">
       {/* Left Column: Form on White */}
       <div className="lg:col-span-7 flex flex-col justify-between p-6 sm:p-10 lg:p-16 xl:p-20 max-w-xl mx-auto w-full">
         <div>
@@ -95,6 +95,7 @@ export default function LoginPage() {
               width={140}
               height={36}
               priority
+              style={{ height: 32, width: "auto" }}
               className="h-8 w-auto object-contain"
             />
           </Link>
@@ -196,7 +197,13 @@ export default function LoginPage() {
             disabled={googleLoading}
             className="w-full border border-neutral-300 hover:bg-neutral-50 text-neutral-700 font-medium py-2.5 px-4 rounded-xl transition-colors text-sm flex items-center justify-center gap-2.5"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              style={{ width: 18, height: 18, minWidth: 18, minHeight: 18, flexShrink: 0 }}
+            >
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                 fill="#4285F4"

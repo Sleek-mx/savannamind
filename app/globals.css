@@ -105,10 +105,30 @@ body {
 
 /* Standalone Auth Isolation */
 .standalone-auth {
-  background-color: #ffffff !important;
+  background-color: #ece8f5 !important;
   color: #171717 !important;
   min-height: 100vh;
   width: 100%;
+}
+
+.standalone-auth input {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  color-scheme: light !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+.standalone-auth input::placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+.standalone-auth input:-webkit-autofill,
+.standalone-auth input:-webkit-autofill:hover,
+.standalone-auth input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #111827 !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 body:has(.standalone-auth),

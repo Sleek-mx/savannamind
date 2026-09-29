@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Lock, CheckCircle2 } from "lucide-react";
@@ -50,6 +50,16 @@ export function LearnLessonLayout({
     return list.length > 0 ? list : previewModules;
   }, [moduleOrder]);
 
+  const navListRef = useRef<HTMLOListElement>(null);
+
+  useEffect(() => {
+    if (!navListRef.current) return;
+    const activeEl = navListRef.current.querySelector(".learn-unit-nav-pill-active");
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }
+  }, [unitIndex]);
+
   return (
     <div className="learn-lesson-layout">
       <header className="learn-lesson-topbar">
@@ -64,7 +74,7 @@ export function LearnLessonLayout({
               className="h-6 sm:h-7 w-auto object-contain"
             />
           </Link>
-          <div className="flex items-center gap-1.5 leading-none">
+          <div className="hidden sm:flex items-center gap-1.5 leading-none">
             <span className="learn-lesson-topbar-back">{isSw ? "Somo" : "Lesson"}</span>
             {currentUnit && (
               <>
@@ -77,18 +87,18 @@ export function LearnLessonLayout({
           </div>
         </div>
         <div className="learn-lesson-topbar-actions">
-          <span className="learn-lesson-topbar-level hidden sm:inline">{isSw ? "Kiwango" : "Level"}: {module.level}</span>
-          <Button href={`/${locale}/learn/studio`} variant="outline" size="sm">
+          <span className="learn-lesson-topbar-level hidden md:inline">{isSw ? "Kiwango" : "Level"}: {module.level}</span>
+          <Button href={`/${locale}/learn/studio`} variant="outline" size="sm" className="h-8 px-2.5 sm:px-3 text-xs font-semibold">
             <span className="hidden sm:inline">{isSw ? "Rudi kwenye dashibodi" : "Back to dashboard"}</span>
             <span className="sm:hidden">{isSw ? "Dashibodi" : "Dashboard"}</span>
           </Button>
-          <SignOutButton locale={locale} />
+          <SignOutButton locale={locale} className="h-8 px-2.5 sm:px-3 text-xs font-semibold" />
         </div>
       </header>
 
       {/* Mobile unit navigation — horizontally scrollable, jump within reached frontier */}
       <nav className="learn-unit-nav" aria-label={isSw ? "Vitengo vya somo" : "Lesson units"}>
-        <ol className="learn-unit-nav-list">
+        <ol ref={navListRef} className="learn-unit-nav-list">
           {module.units.map((u, i) => {
             const active = i === unitIndex;
             const done = i < unitIndex;

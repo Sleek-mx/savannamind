@@ -295,7 +295,7 @@ export function KiboAssistant({
                   onChange={(e) => setDraft(e.target.value)}
                   maxLength={500}
                   placeholder={isSw ? "Uliza Kibo…" : "Ask Kibo…"}
-                  className="flex-1 rounded-xl border border-learn-teal/20 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-learn-teal-bright"
+                  className="flex-1 rounded-xl border border-learn-teal/20 bg-white text-black placeholder:text-black/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-learn-teal-bright"
                 />
                 <button
                   type="submit"

@@ -10,7 +10,6 @@ const stepOrder: OnboardingStep[] = [
   "career",
   "level",
   "guardian",
-  "nickname",
 ];
 
 export function OnboardingStepLoop({
@@ -25,7 +24,7 @@ export function OnboardingStepLoop({
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 mb-8">
-      <div className="hidden lg:grid lg:grid-cols-6 gap-2">
+      <div className="hidden lg:grid lg:grid-cols-5 gap-2">
         {stepOrder.map((step, i) => {
           const active = i === idx;
           const done = i < idx;

@@ -9,10 +9,13 @@ export const onboardingSteps = [
   "career",
   "level",
   "guardian",
-  "nickname",
 ] as const;
 
 export type OnboardingStep = (typeof onboardingSteps)[number];
+
+export function isOnboardingStep(value: string): value is OnboardingStep {
+  return (onboardingSteps as readonly string[]).includes(value);
+}
 
 export function stepLabels(locale: Locale): Record<OnboardingStep, string> {
   if (locale === "sw") {
@@ -22,7 +25,6 @@ export function stepLabels(locale: Locale): Record<OnboardingStep, string> {
       career: "Chagua kazi kutoka orodha",
       level: "Uzoefu wako na teknolojia na AI ni kiasi gani?",
       guardian: "Idhini ya mlezi",
-      nickname: "Jina lako la jukwaa (si jina halisi)",
     };
   }
   return {
@@ -31,7 +33,6 @@ export function stepLabels(locale: Locale): Record<OnboardingStep, string> {
     career: "Choose your career from the list",
     level: "How comfortable are you with technology and AI?",
     guardian: "Guardian consent",
-    nickname: "Choose a platform nickname (not your full legal name)",
   };
 }
 
@@ -93,5 +94,5 @@ export function cookingCopy(locale: Locale, nickname: string) {
 
 export const loopStepTitles = (locale: Locale) =>
   locale === "sw"
-    ? ["Lugha", "Umri", "Kazi", "Kiwango", "Idhini", "Jina"]
-    : ["Language", "Age", "Career", "Level", "Guardian", "Name"];
+    ? ["Lugha", "Umri", "Kazi", "Kiwango", "Idhini"]
+    : ["Language", "Age", "Career", "Level", "Guardian"];

@@ -9,10 +9,11 @@ const SYSTEM_PROMPT = (opts: {
   locale: string;
   ageBand: string;
   career: string;
+  learnerName?: string;
   moduleTitle?: string;
   moduleLevel?: string;
 }) => {
-  const { locale, ageBand, career, moduleTitle, moduleLevel } = opts;
+  const { locale, ageBand, career, learnerName, moduleTitle, moduleLevel } = opts;
   const lang = locale === "sw" ? "Kiswahili" : "English";
   const kid = ageBand === "kids";
   const contextLine = moduleTitle
@@ -21,9 +22,13 @@ const SYSTEM_PROMPT = (opts: {
   const audienceLine = kid
     ? "Use very simple words, short sentences, and concrete everyday examples. Never mention accounts, payments, or adult topics."
     : "Pitch at a working professional or student level; use practical East African examples.";
+  const nameLine = learnerName
+    ? `The learner's name is ${learnerName}. Address them by this name when it is natural; do not invent other personal details or ask them to re-enter a name.`
+    : "Do not invent a name for the learner.";
 
   return `You are Kibo, a study companion for Savanna Mind Learn, an AI-literacy platform for learners in Kenya.
 Reply only in ${lang}. Learner age band: ${ageBand}. Career context: ${career}. ${contextLine}
+${nameLine}
 Teach like a patient tutor: give a one-line definition, then one concrete example, then one short check question the learner can answer.
 Be concise (max 140 words). Focus on AI concepts (data, models, prompts, verification, responsible use) — not generic tech hype.
 ${audienceLine}
@@ -64,6 +69,7 @@ export async function POST(req: Request) {
     locale?: string;
     ageBand?: string;
     career?: string;
+    learnerName?: string;
     moduleId?: string;
     moduleLevel?: string;
     history?: unknown;
@@ -85,6 +91,10 @@ export async function POST(req: Request) {
   const locale = body.locale === "sw" ? "sw" : "en";
   const ageBand = body.ageBand ?? "adult";
   const career = body.career ?? "exploring";
+  const learnerName =
+    typeof body.learnerName === "string"
+      ? body.learnerName.trim().slice(0, 100).replace(/[\r\n]+/g, " ")
+      : "";
 
   // Lesson context: resolve the human-readable module title.
   const moduleMeta = body.moduleId
@@ -114,6 +124,7 @@ export async function POST(req: Request) {
               locale,
               ageBand,
               career,
+              learnerName: learnerName || undefined,
               moduleTitle,
               moduleLevel: body.moduleLevel,
             }),

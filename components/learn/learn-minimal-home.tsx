@@ -10,6 +10,8 @@ import { modulesForProfile } from "@/lib/learn/modules";
 import { firstIncompleteModule, loadProgress, type LearnProgress } from "@/lib/learn/progress";
 import type { LearnProfile } from "@/lib/learn/types";
 import { clearProfile, resetLearnProgress } from "@/lib/learn/storage";
+import { deriveLearnerName } from "@/lib/learn/learner-name";
+import { useAuth } from "@/lib/supabase/auth-context";
 import { Button } from "@/components/ui/button";
 import { LearnSettingsDialog } from "@/components/learn/learn-settings-dialog";
 
@@ -23,6 +25,8 @@ export function LearnMinimalHome({
   onContinue: () => void;
 }) {
   const isSw = locale === "sw";
+  const { user } = useAuth();
+  const displayName = deriveLearnerName(user, profile.nickname);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [progress, setProgress] = useState<LearnProgress>(() => loadProgress());
 
@@ -91,7 +95,7 @@ export function LearnMinimalHome({
         </div>
         <div className="learn-hero-band-content">
           <p className="learn-hero-band-eyebrow">
-            {profile.nickname} · {isSw ? "Savanna Mind Learn" : "Savanna Mind Learn"}
+            {displayName} · {isSw ? "Savanna Mind Learn" : "Savanna Mind Learn"}
           </p>
           <h1 id="learn-hero-heading" className="learn-hero-band-title">
             {hasStarted

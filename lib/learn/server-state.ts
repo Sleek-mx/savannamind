@@ -7,6 +7,7 @@ import {
   LEARN_STATE_VERSION,
   type CloudLearnState,
 } from "./cloud-state";
+import { deriveLearnerName } from "./learner-name";
 import type { LearnProfile } from "./types";
 import type { LearnProgress } from "./progress";
 import type { QuizProgressState } from "./quiz-progress";
@@ -524,7 +525,7 @@ export async function ensureProfileRow(user: User) {
   const { error } = await admin.from("profiles").upsert({
     id: user.id,
     email: user.email,
-    full_name: user.user_metadata?.full_name ?? user.email?.split("@")[0] ?? "Learner",
+    full_name: deriveLearnerName(user, "Learner"),
     updated_at: new Date().toISOString(),
   }, { onConflict: "id", ignoreDuplicates: true });
   if (error) {

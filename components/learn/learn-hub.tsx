@@ -19,6 +19,8 @@ import {
 import type { LearnProfile } from "@/lib/learn/types";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { useAuth } from "@/lib/supabase/auth-context";
+import { deriveLearnerName } from "@/lib/learn/learner-name";
 
 export function LearnHub({
   profile,
@@ -28,6 +30,8 @@ export function LearnHub({
   locale: "en" | "sw";
 }) {
   const isSw = locale === "sw";
+  const { user } = useAuth();
+  const displayName = deriveLearnerName(user, profile.nickname);
   const reduce = useReducedMotion();
   const [progress, setProgress] = useState<LearnProgress>(() => loadProgress());
   const [blurContinue, setBlurContinue] = useState(true);
@@ -92,7 +96,9 @@ export function LearnHub({
       transition={{ type: "tween", duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
     >
       <header className="learn-topbar learn-hub-topbar">
-        <span className="learn-hub-back text-sm font-medium">{isSw ? "Dashibodi" : "Dashboard"}</span>
+        <span className="learn-hub-back text-sm font-medium">
+          {displayName} · {isSw ? "Dashibodi" : "Dashboard"}
+        </span>
         <Image src="/logo-full.png" alt="savannamind" width={120} height={32} />
         <div className="learn-hub-actions">
           <span className="learn-topbar-chip">{progress.totalXp} XP</span>

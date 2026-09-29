@@ -14,7 +14,6 @@ import {
   QuestionnaireNext,
   QuestionnairePrevious,
   QuestionnaireProgress,
-  QuestionnaireSubmit,
   QuestionnaireTitle,
 } from "@/components/ui/questionnaire";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -47,11 +46,14 @@ import {
   careerQuestion,
   cookingCopy,
   levelOptions,
+  isOnboardingStep,
   stepLabels,
   type OnboardingStep,
 } from "@/lib/learn/copy";
 import { hydrateLearnStateFromCloud } from "@/lib/learn/cloud-sync";
+import { deriveLearnerName } from "@/lib/learn/learner-name";
 import { loadProfile, saveProfile, loadOnboardingDraft, saveOnboardingDraft, clearOnboardingDraft } from "@/lib/learn/storage";
+import { useAuth } from "@/lib/supabase/auth-context";
 import type { AgeBand, CareerId, LearnLevel, LearnProfile } from "@/lib/learn/types";
 
 type Phase = "splash" | "onboarding" | "cooking" | "home";
@@ -60,17 +62,29 @@ function needsGuardian(age: AgeBand | null) {
   return age === "kids";
 }
 
+const PREVIOUS_STEP: Record<OnboardingStep, OnboardingStep | null> = {
+  language: null,
+  age: "language",
+  career: "age",
+  level: "career",
+  guardian: "level",
+};
+
 export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, isLoading: authLoading } = useAuth();
   const [phase, setPhase] = useState<Phase>("splash");
   const [step, setStep] = useState<OnboardingStep>("language");
   const [ageBand, setAgeBand] = useState<AgeBand | null>(null);
   const [career, setCareer] = useState<CareerId | null>(null);
   const [level, setLevel] = useState<LearnLevel | null>(null);
   const [guardianConfirmed, setGuardianConfirmed] = useState(false);
-  const [nickname, setNickname] = useState("");
   const [profile, setProfile] = useState<LearnProfile | null>(null);
+  const learnerName = useMemo(
+    () => deriveLearnerName(user, locale === "sw" ? "Mwanafunzi" : "Learner"),
+    [user, locale]
+  );
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [introStage, setIntroStage] = useState(0);
   const [introExiting, setIntroExiting] = useState(false);
@@ -88,7 +102,6 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
     setCareer(null);
     setLevel(null);
     setGuardianConfirmed(false);
-    setNickname("");
     setIntroExiting(true);
     window.setTimeout(() => setPhase("onboarding"), reduceMotion ? 0 : 420);
   }, [reduceMotion]);
@@ -126,7 +139,6 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
         setCareer(null);
         setLevel(null);
         setGuardianConfirmed(false);
-        setNickname("");
         setPhase("onboarding");
         setIntroStage(4);
         setProfileLoaded(true);
@@ -138,12 +150,19 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
         if (searchParams.get("hub") === "1") setPhase("home");
       } else {
         const draft = loadOnboardingDraft();
-        if (draft?.step) {
-          setStep(draft.step as OnboardingStep);
+        if (draft?.step === "nickname") {
+          if (draft.ageBand && draft.career && draft.level) {
+            setAgeBand(draft.ageBand as AgeBand);
+            setCareer(draft.career as CareerId);
+            setLevel(draft.level as LearnLevel);
+            if (draft.guardianConfirmed) setGuardianConfirmed(true);
+            setPhase("cooking");
+          }
+        } else if (draft?.step && isOnboardingStep(draft.step)) {
+          setStep(draft.step);
           if (draft.ageBand) setAgeBand(draft.ageBand as AgeBand);
           if (draft.career) setCareer(draft.career as CareerId);
           if (draft.level) setLevel(draft.level as LearnLevel);
-          if (draft.nickname) setNickname(draft.nickname);
           if (draft.guardianConfirmed) setGuardianConfirmed(true);
         }
       }
@@ -159,11 +178,12 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
   const labels = stepLabels(locale);
 
   const advanceAfterCooking = useCallback(() => {
+    if (!ageBand || !career || !level) return;
     const p: LearnProfile = {
-      nickname: nickname.trim() || (locale === "sw" ? "Mwanafunzi" : "Learner"),
-      ageBand: ageBand!,
-      career: career!,
-      level: level!,
+      nickname: learnerName,
+      ageBand,
+      career,
+      level,
       guardianConfirmed: needsGuardian(ageBand) ? guardianConfirmed : true,
       locale,
       onboardingComplete: true,
@@ -174,7 +194,16 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
     clearOnboardingDraft();
     setProfile(p);
     setPhase("home");
-  }, [ageBand, career, guardianConfirmed, level, locale, nickname]);
+  }, [ageBand, career, guardianConfirmed, learnerName, level, locale]);
+
+  useEffect(() => {
+    if (authLoading || !user) return;
+    if (!profile?.onboardingComplete) return;
+    if (profile.nickname === learnerName) return;
+    const next = { ...profile, nickname: learnerName };
+    saveProfile(next);
+    setProfile(next);
+  }, [authLoading, learnerName, profile, user]);
 
   useEffect(() => {
     if (phase !== "cooking") return;
@@ -204,32 +233,49 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
     }
     if (step === "level") {
       setLevel(id as LearnLevel);
-      const nextStep = needsGuardian(ageBand) ? "guardian" : "nickname";
+      if (needsGuardian(ageBand)) {
+        saveOnboardingDraft({
+          step: "guardian",
+          ageBand: ageBand ?? undefined,
+          career: career ?? undefined,
+          level: id,
+        });
+        setStep("guardian");
+        return;
+      }
       saveOnboardingDraft({
-        step: nextStep,
+        step: "level",
         ageBand: ageBand ?? undefined,
         career: career ?? undefined,
         level: id,
       });
-      setStep(nextStep);
-      return;
+      setPhase("cooking");
     }
   };
 
-  const finishNickname = () => {
-    if (!nickname.trim()) return;
-    setPhase("cooking");
+  const goBack = () => {
+    const target = PREVIOUS_STEP[step];
+    if (target) {
+      setStep(target);
+      saveOnboardingDraft({
+        step: target,
+        ageBand: ageBand ?? undefined,
+        career: career ?? undefined,
+        level: level ?? undefined,
+        guardianConfirmed: guardianConfirmed || undefined,
+      });
+    } else setPhase("splash");
   };
 
-  const cooking = cookingCopy(locale, nickname);
+  const cooking = cookingCopy(locale, learnerName);
 
   const question = useMemo(() => {
     if (step === "language") return labels.language;
     if (step === "age") return labels.age;
     if (step === "career") return careerQuestion(locale, ageBand);
     if (step === "level") return labels.level;
-    return labels.nickname;
-  }, [labels, step]);
+    return labels.guardian;
+  }, [ageBand, labels, locale, step]);
 
   const options = useMemo(() => {
     if (step === "language")
@@ -357,7 +403,6 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
             <Questionnaire
               onSubmit={(e) => {
                 e.preventDefault();
-                if (step === "nickname") finishNickname();
               }}
             >
               <QuestionnaireProgress
@@ -371,13 +416,9 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
                     ? 3
                     : step === "level"
                     ? 4
-                    : step === "guardian"
-                    ? 5
-                    : needsGuardian(ageBand)
-                    ? 6
                     : 5
                 }
-                total={needsGuardian(ageBand) ? 6 : 5}
+                total={needsGuardian(ageBand) ? 5 : 4}
                 render={(props, state) => (
                   <div {...props} className="flex flex-col gap-2 w-full mb-4">
                     <div className="flex items-center gap-1.5 w-full">
@@ -421,27 +462,7 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
                   <QuestionnaireActions>
                     <QuestionnairePrevious
                       label={locale === "sw" ? "Rudi" : "Back"}
-                      onClick={() => {
-                        const previous: Record<OnboardingStep, OnboardingStep | null> = {
-                          language: null,
-                          age: "language",
-                          career: "age",
-                          level: "career",
-                          guardian: "level",
-                          nickname: needsGuardian(ageBand) ? "guardian" : "level",
-                        };
-                        const target = previous[step];
-                        if (target) {
-                          setStep(target);
-                          saveOnboardingDraft({
-                            step: target,
-                            ageBand: ageBand ?? undefined,
-                            career: career ?? undefined,
-                            level: level ?? undefined,
-                            nickname,
-                          });
-                        } else setPhase("splash");
-                      }}
+                      onClick={goBack}
                     />
                   </QuestionnaireActions>
                 </QuestionnaireItem>
@@ -465,27 +486,7 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
                   <QuestionnaireActions>
                     <QuestionnairePrevious
                       label={locale === "sw" ? "Rudi" : "Back"}
-                      onClick={() => {
-                        const previous: Record<OnboardingStep, OnboardingStep | null> = {
-                          language: null,
-                          age: "language",
-                          career: "age",
-                          level: "career",
-                          guardian: "level",
-                          nickname: needsGuardian(ageBand) ? "guardian" : "level",
-                        };
-                        const target = previous[step];
-                        if (target) {
-                          setStep(target);
-                          saveOnboardingDraft({
-                            step: target,
-                            ageBand: ageBand ?? undefined,
-                            career: career ?? undefined,
-                            level: level ?? undefined,
-                            nickname,
-                          });
-                        } else setPhase("splash");
-                      }}
+                      onClick={goBack}
                     />
                   </QuestionnaireActions>
                 </QuestionnaireItem>
@@ -518,27 +519,7 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
                   <QuestionnaireActions>
                     <QuestionnairePrevious
                       label={locale === "sw" ? "Rudi" : "Back"}
-                      onClick={() => {
-                        const previous: Record<OnboardingStep, OnboardingStep | null> = {
-                          language: null,
-                          age: "language",
-                          career: "age",
-                          level: "career",
-                          guardian: "level",
-                          nickname: needsGuardian(ageBand) ? "guardian" : "level",
-                        };
-                        const target = previous[step];
-                        if (target) {
-                          setStep(target);
-                          saveOnboardingDraft({
-                            step: target,
-                            ageBand: ageBand ?? undefined,
-                            career: career ?? undefined,
-                            level: level ?? undefined,
-                            nickname,
-                          });
-                        } else setPhase("splash");
-                      }}
+                      onClick={goBack}
                     />
                     <QuestionnaireNext
                       label={locale === "sw" ? "Endelea" : "Next"}
@@ -575,27 +556,7 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
                   <QuestionnaireActions>
                     <QuestionnairePrevious
                       label={locale === "sw" ? "Rudi" : "Back"}
-                      onClick={() => {
-                        const previous: Record<OnboardingStep, OnboardingStep | null> = {
-                          language: null,
-                          age: "language",
-                          career: "age",
-                          level: "career",
-                          guardian: "level",
-                          nickname: needsGuardian(ageBand) ? "guardian" : "level",
-                        };
-                        const target = previous[step];
-                        if (target) {
-                          setStep(target);
-                          saveOnboardingDraft({
-                            step: target,
-                            ageBand: ageBand ?? undefined,
-                            career: career ?? undefined,
-                            level: level ?? undefined,
-                            nickname,
-                          });
-                        } else setPhase("splash");
-                      }}
+                      onClick={goBack}
                     />
                   </QuestionnaireActions>
                 </QuestionnaireItem>
@@ -623,95 +584,21 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
                   <QuestionnaireActions>
                     <QuestionnairePrevious
                       label={locale === "sw" ? "Rudi" : "Back"}
-                      onClick={() => {
-                        const previous: Record<OnboardingStep, OnboardingStep | null> = {
-                          language: null,
-                          age: "language",
-                          career: "age",
-                          level: "career",
-                          guardian: "level",
-                          nickname: needsGuardian(ageBand) ? "guardian" : "level",
-                        };
-                        const target = previous[step];
-                        if (target) {
-                          setStep(target);
-                          saveOnboardingDraft({
-                            step: target,
-                            ageBand: ageBand ?? undefined,
-                            career: career ?? undefined,
-                            level: level ?? undefined,
-                            nickname,
-                          });
-                        } else setPhase("splash");
-                      }}
+                      onClick={goBack}
                     />
                     <QuestionnaireNext
                       label={locale === "sw" ? "Endelea" : "Next"}
                       disabled={!guardianConfirmed}
                       onClick={() => {
                         saveOnboardingDraft({
-                          step: "nickname",
+                          step: "guardian",
                           ageBand: ageBand ?? undefined,
                           career: career ?? undefined,
                           level: level ?? undefined,
                           guardianConfirmed: true,
                         });
-                        setStep("nickname");
+                        setPhase("cooking");
                       }}
-                    />
-                  </QuestionnaireActions>
-                </QuestionnaireItem>
-              )}
-
-              {step === "nickname" && (
-                <QuestionnaireItem name="nickname">
-                  <QuestionnaireTitle>{labels.nickname}</QuestionnaireTitle>
-                  <div className="w-full my-3">
-                    <input
-                      type="text"
-                      maxLength={24}
-                      value={nickname}
-                      onChange={(e) => setNickname(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && nickname.trim()) {
-                          e.preventDefault();
-                          finishNickname();
-                        }
-                      }}
-                      placeholder={locale === "sw" ? "mf. Amina" : "e.g. Amina"}
-                      className="w-full rounded-xl border border-learn-teal/20 bg-white text-learn-ink px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-learn-teal shadow-sm"
-                      autoFocus
-                    />
-                  </div>
-                  <QuestionnaireActions>
-                    <QuestionnairePrevious
-                      label={locale === "sw" ? "Rudi" : "Back"}
-                      onClick={() => {
-                        const previous: Record<OnboardingStep, OnboardingStep | null> = {
-                          language: null,
-                          age: "language",
-                          career: "age",
-                          level: "career",
-                          guardian: "level",
-                          nickname: needsGuardian(ageBand) ? "guardian" : "level",
-                        };
-                        const target = previous[step];
-                        if (target) {
-                          setStep(target);
-                          saveOnboardingDraft({
-                            step: target,
-                            ageBand: ageBand ?? undefined,
-                            career: career ?? undefined,
-                            level: level ?? undefined,
-                            nickname,
-                          });
-                        } else setPhase("splash");
-                      }}
-                    />
-                    <QuestionnaireSubmit
-                      label={locale === "sw" ? "Endelea" : "Continue"}
-                      disabled={!nickname.trim()}
-                      onClick={finishNickname}
                     />
                   </QuestionnaireActions>
                 </QuestionnaireItem>

@@ -5,6 +5,8 @@ import Image from "next/image";
 import { MessageCircle, RotateCcw, Send, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { LearnProfile } from "@/lib/learn/types";
+import { useAuth } from "@/lib/supabase/auth-context";
+import { deriveLearnerName } from "@/lib/learn/learner-name";
 import {
   clearTutorHistory,
   loadTutorHistory,
@@ -53,6 +55,8 @@ export function KiboAssistant({
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const isSw = locale === "sw";
+  const { user } = useAuth();
+  const learnerName = deriveLearnerName(user, profile.nickname);
 
   // Load persisted local history once.
   useEffect(() => {
@@ -133,6 +137,7 @@ export function KiboAssistant({
             locale,
             ageBand: profile.ageBand,
             career: profile.career,
+            learnerName,
             moduleId,
             history: history
               .slice(-8, -1)
@@ -171,7 +176,7 @@ export function KiboAssistant({
         setLoading(false);
       }
     },
-    [isSw, loading, messages, moduleId, persist, profile.ageBand, profile.career, locale]
+    [isSw, learnerName, loading, messages, moduleId, persist, profile.ageBand, profile.career, locale]
   );
 
   const lastUser = [...messages].reverse().find((m) => m.role === "user");
@@ -241,8 +246,8 @@ export function KiboAssistant({
             {messages.length === 0 && (
               <p className="kibo-note">
                 {isSw
-                  ? "Andika swali lako. Usiweke siri, vitambulisho, wala taarifa za mgonjwa."
-                  : "Type your question. Do not share secrets, IDs, or patient details."}
+                  ? `${learnerName}, andika swali lako. Usiweke siri, vitambulisho, wala taarifa za mgonjwa.`
+                  : `${learnerName}, type your question. Do not share secrets, IDs, or patient details.`}
               </p>
             )}
             {messages.map((msg, i) => (

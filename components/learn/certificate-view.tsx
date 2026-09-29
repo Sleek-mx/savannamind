@@ -5,17 +5,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { loadProgress } from "@/lib/learn/progress";
 import { loadProfile } from "@/lib/learn/storage";
+import { deriveLearnerName } from "@/lib/learn/learner-name";
+import { useAuth } from "@/lib/supabase/auth-context";
 import { Button } from "@/components/ui/button";
 
 const REQUIRED = ["m0", "agr", "hlt", "edu", "biz", "cap"];
 
 export function CertificateView({ locale }: { locale: "en" | "sw" }) {
+  const { user } = useAuth();
   const profile = useMemo(() => loadProfile(), []);
   const progress = useMemo(() => loadProgress(), []);
 
   const allDone = REQUIRED.every((id) => progress.modules[id]?.completed);
   const isSw = locale === "sw";
-  const name = profile?.nickname ?? (isSw ? "Mwanafunzi" : "Learner");
+  const name = deriveLearnerName(user, profile?.nickname ?? (isSw ? "Mwanafunzi" : "Learner"));
   const issued = progress.certificateIssuedAt
     ? new Date(progress.certificateIssuedAt).toLocaleDateString(isSw ? "sw-KE" : "en-KE")
     : null;

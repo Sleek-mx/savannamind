@@ -128,9 +128,67 @@ const flashcards = readFileSync(join(learnComponents, "flashcard-bullets.tsx"), 
 if (flashcards.includes("Next card") && flashcards.includes("onClick={onComplete}")) {
   ok("flashcard Next advances to the next card after bullets reveal");
 } else fail("flashcard Next does not advance the card");
-if (studioApp.includes("previous[step]") && studioApp.includes("language: null")) {
+if (studioApp.includes("goBack") && studioApp.includes("language: null") && studioApp.includes("PREVIOUS_STEP")) {
   ok("real onboarding remains language-first and supports backward navigation");
 } else fail("onboarding language-first/back navigation missing");
+
+if (
+  !studioApp.includes("finishNickname") &&
+  !studioApp.includes('step === "nickname" &&') &&
+  studioApp.includes("deriveLearnerName")
+) {
+  ok("nickname questionnaire removed; learner name derived from auth");
+} else fail("nickname onboarding step still present or auth name derivation missing");
+
+const copySrc = readFileSync(join(root, "lib/learn/copy.ts"), "utf8");
+if (
+  copySrc.includes('"language"') &&
+  copySrc.includes('"guardian"') &&
+  !copySrc.includes('"nickname"')
+) {
+  ok("onboarding step list no longer includes nickname");
+} else fail("copy.ts onboarding steps still include nickname");
+
+const nameCheck = spawnSync(
+  "npx",
+  [
+    "--yes",
+    "tsx",
+    "-e",
+    `import { deriveLearnerName } from './lib/learn/learner-name.ts';
+const a = deriveLearnerName({ user_metadata: { full_name: 'Amina Wanjiku' }, email: 'x@y.com' });
+const b = deriveLearnerName({ user_metadata: { name: 'Otieno' }, email: 'x@y.com' });
+const c = deriveLearnerName({ user_metadata: {}, email: 'kibo@example.com' });
+const d = deriveLearnerName(null, 'Learner');
+if (a !== 'Amina Wanjiku' || b !== 'Otieno' || c !== 'kibo' || d !== 'Learner') {
+  console.error(JSON.stringify({ a, b, c, d }));
+  process.exit(1);
+}
+console.log('names ok');`,
+  ],
+  { cwd: root, encoding: "utf8" }
+);
+if (nameCheck.status === 0) ok("deriveLearnerName prefers full_name, then name, then email prefix");
+else fail(`deriveLearnerName fallbacks: ${nameCheck.stderr || nameCheck.stdout}`);
+
+const hub = readFileSync(join(learnComponents, "learn-hub.tsx"), "utf8");
+if (hub.includes("deriveLearnerName") && hub.includes("displayName")) {
+  ok("dashboard receives auto-derived learner name");
+} else fail("dashboard does not display derived learner name");
+
+const certificate = readFileSync(join(learnComponents, "certificate-view.tsx"), "utf8");
+if (certificate.includes("deriveLearnerName")) {
+  ok("certificate receives auto-derived learner name");
+} else fail("certificate does not use derived learner name");
+
+const tutorRoute = readFileSync(join(root, "app/api/learn/tutor/route.ts"), "utf8");
+if (
+  kibo.includes("learnerName") &&
+  tutorRoute.includes("learnerName") &&
+  tutorRoute.includes("The learner's name is")
+) {
+  ok("Kibo tutor receives auto-derived learner name");
+} else fail("Kibo tutor does not receive learner name");
 
 const definitions = readFileSync(join(learnComponents, "definition-flip-cards.tsx"), "utf8");
 if (definitions.includes("Tap to reveal") && definitions.includes("aria-expanded={isRevealed}") && definitions.includes("isRevealed && <p")) {

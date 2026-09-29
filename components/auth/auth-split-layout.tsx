@@ -94,13 +94,21 @@ export function AuthSplitLayout({ locale, mode, children }: AuthSplitLayoutProps
       <main className="auth-split__panel">
         <div className="auth-split__card">
           <div className="auth-split__top">
-            <Link href={`/${locale}`} className="auth-split__logo" aria-label="Savanna Mind home">
-              <Image src="/logo-mark.png" alt="" width={44} height={44} priority />
-            </Link>
             <p className="auth-split__switch">
               <span>{block.switchPrompt} </span>
               <Link href={`/${locale}/${otherPath}`}>{block.switchLink}</Link>
             </p>
+            <Link href={`/${locale}`} className="auth-split__brand" aria-label="Savanna Mind home">
+              <Image
+                src="/logo-full.png"
+                alt=""
+                width={160}
+                height={90}
+                priority
+                className="auth-split__logo-img"
+              />
+              <span className="auth-split__wordmark">savanna mind</span>
+            </Link>
           </div>
 
           <h1 className="auth-split__title">{block.title}</h1>

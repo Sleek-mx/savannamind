@@ -28,9 +28,10 @@ const copy = {
     title: "We Are Open to Conversation",
     lead: "Get in touch with us. Our door is always open for a good cup of coffee at Delta Riverside Office Park, or connect with our research and enterprise team online.",
     formHeading: "How Can We Help You?",
-    formIntro: "Use this preview form to draft an inquiry. Submissions are not sent from this page yet.",
-    previewNotice: `This form is a preview. Email ${CONTACT_EMAIL} or call ${CONTACT_PHONE} until a submission inbox is connected.`,
-    blockedNotice: `Nothing was sent. Please email ${CONTACT_EMAIL} or call ${CONTACT_PHONE}.`,
+    formIntro: "Send us a message and our team will respond by email.",
+    previewNotice: `Submissions are delivered securely to our team. You can also email ${CONTACT_EMAIL} or call ${CONTACT_PHONE}.`,
+    blockedNotice: `We could not send your message. Please email ${CONTACT_EMAIL} or call ${CONTACT_PHONE}.`,
+    successNotice: "Thank you — your message was sent. We will reply to your email soon.",
     messagePlaceholder: "Tell us about your organization or inquiry...",
     fields: {
       firstName: "First name",
@@ -63,9 +64,10 @@ const copy = {
     title: "Mlango Wetu U Wazi kwa Mazungumzo",
     lead: "Wasiliana nasi. Mlango wetu uko wazi kila wakati kwa kikombe kizuri cha kahawa katika Delta Riverside Office Park, au wasiliana na timu yetu ya utafiti mtandaoni.",
     formHeading: "Tunawezaje Kukusaidia?",
-    formIntro: "Tumia fomu hii ya onyesho kuandaa ombi. Ujumbe hautumwi kutoka ukurasa huu bado.",
-    previewNotice: `Hii ni fomu ya onyesho. Tuma barua pepe ${CONTACT_EMAIL} au piga ${CONTACT_PHONE} hadi sanduku la uwasilishaji liunganishwe.`,
-    blockedNotice: `Hakuna kilichotumwa. Tafadhali tuma barua pepe ${CONTACT_EMAIL} au piga ${CONTACT_PHONE}.`,
+    formIntro: "Tutumie ujumbe na timu yetu itakujibu kwa barua pepe.",
+    previewNotice: `Ujumbe unafikishwa kwa timu yetu kwa usalama. Unaweza pia kutuma barua pepe ${CONTACT_EMAIL} au kupiga ${CONTACT_PHONE}.`,
+    blockedNotice: `Hatukuweza kutuma ujumbe wako. Tafadhali tuma barua pepe ${CONTACT_EMAIL} au piga ${CONTACT_PHONE}.`,
+    successNotice: "Asante — ujumbe wako umetumwa. Tutajibu barua pepe yako hivi karibuni.",
     messagePlaceholder: "Tuambie kuhusu shirika lako au ombi lako...",
     fields: {
       firstName: "Jina la kwanza",
@@ -126,6 +128,7 @@ export default function ContactPage({ params }: { params: { locale: string } }) 
                 areas={t.areas}
                 previewNotice={t.previewNotice}
                 blockedNotice={t.blockedNotice}
+                successNotice={t.successNotice}
                 messagePlaceholder={t.messagePlaceholder}
               />
             </div>

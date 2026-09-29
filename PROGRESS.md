@@ -1,4 +1,32 @@
-# PROGRESS — Savanna Mind Learn Studio
+# PROGRESS — Savanna Mind production release
+
+## Current goal — 2026-09-29
+
+Release reviewed auth, email, and Learn cloud-sync source from `main` to Git-connected Vercel project `macsinjobs-6649/savannamind`. Canonical URL: `https://savannamind-ashy.vercel.app` until the short `savannamind.vercel.app` hostname can be reclaimed. Never commit `.env.local` or sync `SUPABASE_ACCESS_TOKEN` to Vercel.
+
+## Verified so far
+
+- Git remote is `https://github.com/Sleek-mx/savannamind.git`; `main` matched `origin/main` at initial audit, but the large local auth/cloud change set was uncommitted.
+- Supabase project `epotmrwulmdpgqzuodwp` has private `learner-data` bucket plus `profiles` and `learner_progress` tables; all had zero rows/users at audit. No `demo@savannamind.com` user exists.
+- Supabase Auth Site URL is the ashy URL; redirect allow list includes it; Google provider and Resend SMTP are enabled. Resend key is send-only, so the domain list could not be read through that key.
+- Vercel project is Git-connected to `Sleek-mx/savannamind` on `main`, and its project domains list includes `savannamind-ashy.vercel.app`. Existing CLI deployments used dirty local files under the old Git SHA.
+- Current public ashy `/en/signup` and `/en/login` return 200; logged-out `/en/learn/studio` redirects to login. Short hostname `/en/signup` returns 404.
+- BrowserSkill reports no connected browser, so signed-in UI click-through is currently blocked. `npm run qa:learn` passed before this release's additional source edits.
+- Vercel production variables were refreshed with `node scripts/sync-vercel-env.mjs`; its allowlist excludes `SUPABASE_ACCESS_TOKEN`.
+- Supabase confirmation initially failed because the SMTP sender was `info@savannamind.com`. After changing it to `onboarding@resend.dev`, a confirmation email reached the connected `macsinjobs@gmail.com` inbox. The test account confirmed and password login succeeded through Supabase Auth. Google OAuth initiation redirects to Google with Supabase's callback URI; completing Google account sign-in remains untested.
+- Resend test mode rejects `info@savannamind.com` as a recipient (403) and accepts only `macsinjobs@gmail.com`. `.env.local` and Vercel production env now route contact/waitlist notifications to the connected owner inbox temporarily. Verify a sending domain and switch `RESEND_FROM`, Supabase SMTP sender, and `CONTACT_INBOX_EMAIL` together before using the business inbox.
+- Cloud safety code now validates PUT data, surfaces Storage/table failures, and binds local cache to an account. `npm run qa:learn`, `npx tsc --noEmit`, and full `npm run build` passed. A local production server returned 401 for unsigned Learn state calls; a fresh confirmed test user got 200 empty state, malformed PUT 400, valid PUT 200, and reload GET 200 with matching XP/card. Storage object and both tables reflected saved state. The temporary fresh-user account and its data were removed.
+- UptimeRobot account has five monitors against a 50-monitor limit, and active email (`titusmuhihu@gmail.com`) and phone (`Macsie's S22+`) contacts. Connected UptimeRobot add-monitor API returned 403 `access_denied` even with minimal fields; no Savanna monitor exists yet. It needs a write-capable connection or dashboard access.
+
+## Next
+
+1. Review the bounded Learn cloud-safety worker changes, then finish auth/API fixes and run a clean build.
+2. Link the repo to the intended Vercel project, sync production env from `.env.local` without pulling env, commit and push to `main`.
+3. Verify the Git-triggered production deployment, then smoke-test auth, email, APIs, cloud state, and UptimeRobot monitoring. Report any flow that cannot be verified because BrowserSkill is disconnected or mail cannot be received.
+
+## Historical Learn Studio checkpoint (2026-09-28)
+
+The prior instruction against committing or deploying applied to that earlier audit. The current user explicitly authorized a reviewed push to `main` and a production release.
 
 Repo: `/Volumes/Macsie_SSD/Github/SleekMX/savannamind`
 Branch: `feat/savannamind-full-rebuild`

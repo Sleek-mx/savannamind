@@ -1,3 +1,4 @@
+import { scheduleCloudSync } from "./cloud-sync";
 import { clearProgress } from "./progress";
 import { clearRemediation } from "./remediation";
 import { clearQuizProgress } from "./quiz-progress";
@@ -43,6 +44,7 @@ export function loadProfile(): LearnProfile | null {
 export function saveProfile(profile: LearnProfile) {
   if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+  scheduleCloudSync();
 }
 
 export function clearProfile() {

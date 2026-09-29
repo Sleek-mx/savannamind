@@ -21,6 +21,7 @@ type ContactInquiryFormProps = {
   areas: string[];
   previewNotice: string;
   blockedNotice: string;
+  successNotice: string;
   messagePlaceholder: string;
 };
 
@@ -29,19 +30,43 @@ export function ContactInquiryForm({
   areas,
   previewNotice,
   blockedNotice,
+  successNotice,
   messagePlaceholder,
 }: ContactInquiryFormProps) {
-  const [status, setStatus] = useState<"idle" | "blocked">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const consentId = useId();
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setStatus("blocked");
+    setStatus("sending");
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: String(data.get("firstName") ?? ""),
+          lastName: String(data.get("lastName") ?? ""),
+          email: String(data.get("email") ?? ""),
+          phone: String(data.get("phone") ?? ""),
+          country: String(data.get("country") ?? ""),
+          company: String(data.get("company") ?? ""),
+          area: String(data.get("area") ?? ""),
+          message: String(data.get("message") ?? ""),
+        }),
+      });
+      if (!res.ok) throw new Error("send failed");
+      setStatus("sent");
+      form.reset();
+    } catch {
+      setStatus("error");
+    }
   }
 
   return (
     <form className="contact-form" onSubmit={handleSubmit}>
-      <p className="form-note">{previewNotice}</p>
+      {status === "idle" ? <p className="form-note">{previewNotice}</p> : null}
 
       <div className="form-row">
         <div className="field">
@@ -103,15 +128,20 @@ export function ContactInquiryForm({
         <label htmlFor={consentId}>{fields.consent}</label>
       </div>
 
-      {status === "blocked" ? (
+      {status === "sent" ? (
+        <p className="form-status form-status--ok" role="status" aria-live="polite">
+          {successNotice}
+        </p>
+      ) : null}
+      {status === "error" ? (
         <p className="form-status" role="status" aria-live="polite">
           {blockedNotice}
         </p>
       ) : null}
 
-      <button type="submit" className="btn btn--gold">
+      <button type="submit" className="btn btn--gold" disabled={status === "sending"}>
         <Send size={16} aria-hidden="true" />
-        <span>{fields.submit}</span>
+        <span>{status === "sending" ? "Sending…" : fields.submit}</span>
       </button>
     </form>
   );

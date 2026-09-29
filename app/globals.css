@@ -91,10 +91,12 @@ html {
   text-size-adjust: 100%;
   scroll-behavior: smooth;
   color-scheme: dark;
+  overflow-x: clip;
 }
 
 body {
   min-height: 100vh;
+  overflow-x: clip;
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: 1.65;
@@ -152,6 +154,278 @@ body.auth-route .site-shell {
   margin: 0 !important;
   padding: 0 !important;
   width: 100% !important;
+}
+
+/* ---------- Auth split (login / signup) ---------- */
+.auth-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #fff;
+}
+
+.auth-split__hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.auth-split__hero-img {
+  /* The source includes a mock form on its right half; show only the photo. */
+  width: 200% !important;
+  max-width: none;
+  object-fit: cover;
+  object-position: left center;
+}
+
+.auth-split__hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.08), transparent 40%);
+  pointer-events: none;
+}
+
+.auth-split__panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 2.5rem);
+  background: #fff;
+}
+
+.auth-split__card {
+  width: min(100%, 26rem);
+}
+
+.auth-split__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.auth-split__switch {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: #6b7280;
+  text-align: right;
+  line-height: 1.4;
+}
+
+.auth-split__switch a {
+  color: #1f2937;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-split__title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 var(--space-3);
+  letter-spacing: -0.02em;
+}
+
+.auth-split__subtitle {
+  margin: 0 0 var(--space-6);
+  color: #6b7280;
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  max-width: 34ch;
+}
+
+.auth-split__social {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.auth-split__social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.625rem;
+  background: #fff;
+  color: #111827;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.auth-split__social-btn:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.auth-split__social-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.auth-split__or {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 var(--space-5);
+  color: #9ca3af;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.auth-split__or::before,
+.auth-split__or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.auth-split__field {
+  margin-bottom: var(--space-4);
+}
+
+.auth-split__field label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.35rem;
+}
+
+.auth-split__input-wrap {
+  position: relative;
+}
+
+.auth-split__input-icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.auth-split__input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.65rem 2.75rem 0.65rem 2.65rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.625rem;
+  font-size: var(--text-sm);
+}
+
+.auth-split__input:focus {
+  outline: none;
+  border-color: #1e5631;
+  box-shadow: 0 0 0 3px rgba(30, 86, 49, 0.12);
+}
+
+.auth-split__toggle-pw {
+  position: absolute;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  padding: 0.35rem;
+  cursor: pointer;
+}
+
+.auth-split__submit {
+  width: 100%;
+  min-height: 3rem;
+  margin-top: var(--space-2);
+  border: none;
+  border-radius: 0.625rem;
+  background: #1e5631;
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.auth-split__submit:hover:not(:disabled) {
+  background: #174a29;
+}
+
+.auth-split__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-split__error {
+  margin-bottom: var(--space-4);
+  padding: 0.75rem 1rem;
+  border-radius: 0.625rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  font-size: var(--text-sm);
+}
+
+.auth-split__forgot {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: var(--text-xs);
+  color: #1e5631;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.auth-split__legal {
+  margin-top: var(--space-6);
+  font-size: 0.7rem;
+  color: #9ca3af;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.auth-split__legal a {
+  color: #6b7280;
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .auth-split {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .auth-split__hero {
+    min-height: 11rem;
+    max-height: 28vh;
+  }
+
+  .auth-split__hero-scrim {
+    background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.15));
+  }
+
+  .auth-split__panel {
+    align-items: flex-start;
+    padding: var(--space-5) var(--space-4) var(--space-8);
+  }
+
+  .auth-split__card {
+    width: 100%;
+  }
+
+  .auth-split__subtitle {
+    max-width: none;
+  }
 }
 
 img,
@@ -1316,8 +1590,14 @@ article[id] {
     display: none;
   }
 
+  .site-header__inner {
+    gap: var(--space-2);
+    padding-inline: var(--space-3);
+  }
+
   .site-header__actions {
     gap: var(--space-2);
+    flex-shrink: 0;
   }
 
   .lang-switch a {
@@ -1720,6 +2000,16 @@ ul.copy-list strong {
   grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
   gap: clamp(var(--space-6), 5vw, var(--space-9));
   align-items: start;
+}
+
+@media (max-width: 860px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-form .form-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .contact-form {

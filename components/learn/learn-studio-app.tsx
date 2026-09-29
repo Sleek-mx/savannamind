@@ -49,6 +49,7 @@ import {
   stepLabels,
   type OnboardingStep,
 } from "@/lib/learn/copy";
+import { hydrateLearnStateFromCloud } from "@/lib/learn/cloud-sync";
 import { loadProfile, saveProfile, loadOnboardingDraft, saveOnboardingDraft, clearOnboardingDraft } from "@/lib/learn/storage";
 import type { AgeBand, CareerId, LearnLevel, LearnProfile } from "@/lib/learn/types";
 
@@ -107,36 +108,51 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
   }, [phase, reduceMotion]);
 
   useEffect(() => {
-    if (searchParams.get("onboarding") === "1") {
-      clearOnboardingDraft();
-      setStep("language");
-      setAgeBand(null);
-      setCareer(null);
-      setLevel(null);
-      setGuardianConfirmed(false);
-      setNickname("");
-      setPhase("onboarding");
-      setIntroStage(4);
-      setProfileLoaded(true);
-      return;
-    }
-    const existing = loadProfile();
-    if (existing?.onboardingComplete) {
-      setProfile(existing);
-      if (searchParams.get("hub") === "1") setPhase("home");
-    } else {
-      // Resume an interrupted onboarding (e.g. after a language switch).
-      const draft = loadOnboardingDraft();
-      if (draft?.step) {
-        setStep(draft.step as OnboardingStep);
-        if (draft.ageBand) setAgeBand(draft.ageBand as AgeBand);
-        if (draft.career) setCareer(draft.career as CareerId);
-        if (draft.level) setLevel(draft.level as LearnLevel);
-        if (draft.nickname) setNickname(draft.nickname);
-        if (draft.guardianConfirmed) setGuardianConfirmed(true);
+    let cancelled = false;
+
+    async function bootstrap() {
+      try {
+        await hydrateLearnStateFromCloud();
+      } catch {
+        /* offline — keep local cache */
       }
+      if (cancelled) return;
+
+      if (searchParams.get("onboarding") === "1") {
+        clearOnboardingDraft();
+        setStep("language");
+        setAgeBand(null);
+        setCareer(null);
+        setLevel(null);
+        setGuardianConfirmed(false);
+        setNickname("");
+        setPhase("onboarding");
+        setIntroStage(4);
+        setProfileLoaded(true);
+        return;
+      }
+      const existing = loadProfile();
+      if (existing?.onboardingComplete) {
+        setProfile(existing);
+        if (searchParams.get("hub") === "1") setPhase("home");
+      } else {
+        const draft = loadOnboardingDraft();
+        if (draft?.step) {
+          setStep(draft.step as OnboardingStep);
+          if (draft.ageBand) setAgeBand(draft.ageBand as AgeBand);
+          if (draft.career) setCareer(draft.career as CareerId);
+          if (draft.level) setLevel(draft.level as LearnLevel);
+          if (draft.nickname) setNickname(draft.nickname);
+          if (draft.guardianConfirmed) setGuardianConfirmed(true);
+        }
+      }
+      setProfileLoaded(true);
     }
-    setProfileLoaded(true);
+
+    void bootstrap();
+    return () => {
+      cancelled = true;
+    };
   }, [searchParams]);
 
   const labels = stepLabels(locale);

@@ -23,9 +23,9 @@ const copy = {
     eyebrow: "SavannaMind Learn",
     title: "AI Literacy for Every African",
     lead: "Learn Studio teaches AI the way school does — definitions first, then worked examples, then practice with feedback — grounded in Kenyan and African contexts. English and Kiswahili, side by side.",
-    previewBadge: "Preview",
+    previewBadge: "Live",
     previewNote:
-      "Learn Studio is a preview: your profile and progress are stored only on your own device. There is no account server and no credential is issued yet.",
+      "Learn Studio uses your Savanna Mind account. Profile and progress sync to our secure database so you can continue on any device.",
     kiboTitle: "Meet Kibo — Your AI Study Companion",
     kiboDesc:
       "Kibo, our African lion companion, is with you through every lesson. Ask questions in English or Kiswahili, get plain-language explanations, and keep your chat history on your own device.",
@@ -39,21 +39,22 @@ const copy = {
       desc: m.descEn,
     })),
     waitlistHeading: "Be First in the Next Cohort",
-    waitlistDesc: "Guided cohorts are not open yet. Waitlist sign-up is not live.",
-    waitlistPreview: `This waitlist does not store emails yet. Write to ${CONTACT_EMAIL} to register interest.`,
-    waitlistBlocked: `Your email was not stored. Email ${CONTACT_EMAIL} to register interest.`,
+    waitlistDesc: "Join the waitlist for guided cohorts and launch updates.",
+    waitlistPreview: "We will email you when the next cohort opens.",
+    waitlistBlocked: `We could not save your email. Try again or write to ${CONTACT_EMAIL}.`,
+    waitlistSuccess: "You are on the list. We will email you when cohorts open.",
     waitlistEmailLabel: "Email address",
     waitlistBtn: "Join Cohort Waitlist",
     studioCta: "Start learning in the Studio",
-    studioNote: "Free preview — local profile only, no account needed.",
+    studioNote: "Sign in with email or Google to save your progress.",
   },
   sw: {
     eyebrow: "SavannaMind Learn",
     title: "Elimu ya AI kwa Kila Mwafrika",
     lead: "Learn Studio hufundisha AI kama shule — ufafanuzi kwanza, kisha mifano, kisha mazoezi yenye marejesho — kwa muktadha wa Kenya na Afrika. Kiingereza na Kiswahili, kila wakati.",
-    previewBadge: "Onyesho",
+    previewBadge: "Hai",
     previewNote:
-      "Learn Studio ni onyesho: wasifu na maendeleo yako vinahifadhiwa kwenye kifaa chako tu. Hakuna akaunti ya seva na hakuna cheti kinachotolewa bado.",
+      "Learn Studio hutumia akaunti yako ya Savanna Mind. Wasifu na maendeleo vinahifadhiwa kwa usalama ili uendelee kwenye kifaa chochote.",
     kiboTitle: "Kutana na Kibo — Rafiki Yako wa Masomo",
     kiboDesc:
       "Kibo, simba wetu wa Kiafrika, yuko nawe kila somo. Uliza kwa Kiingereza au Kiswahili, pata maelezo ya lugha rahisi, na historia yako inabaki kwenye kifaa chako.",
@@ -67,13 +68,14 @@ const copy = {
       desc: m.descSw,
     })),
     waitlistHeading: "Kuwa wa Kwanza Kwenye Kundi Lijalo",
-    waitlistDesc: "Makundi ya mwongozo hayajafunguka. Usajili wa orodha ya awali haujaanza.",
-    waitlistPreview: `Orodha hii haihifadhi barua pepe bado. Andika ${CONTACT_EMAIL} kuonyesha nia.`,
-    waitlistBlocked: `Barua pepe yako haikuhifadhiwa. Tuma ${CONTACT_EMAIL} kuonyesha nia.`,
+    waitlistDesc: "Jiunge na orodha ya awali kwa makundi ya mwongozo na taarifa za uzinduzi.",
+    waitlistPreview: "Tutakutumia barua pepe makundi yanapofunguka.",
+    waitlistBlocked: `Hatukuweza kuhifadhi barua pepe yako. Jaribu tena au andika ${CONTACT_EMAIL}.`,
+    waitlistSuccess: "Uko kwenye orodha. Tutakutumia barua pepe makundi yanapofunguka.",
     waitlistEmailLabel: "Barua pepe",
     waitlistBtn: "Jiunge na Orodha ya Awali",
     studioCta: "Anza kujifunza kwenye Studio",
-    studioNote: "Onyesho huru — wasifu wa kifaa tu, hakuna akaunti.",
+    studioNote: "Ingia kwa barua pepe au Google ili kuhifadhi maendeleo yako.",
   },
 };
 
@@ -189,7 +191,7 @@ export default function LearnPage({ params }: { params: { locale: string } }) {
                   <CheckCircle size={14} style={{ color: "var(--color-teal-bright)" }} /> EN / SW
                 </span>
                 <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                  <CheckCircle size={14} style={{ color: "var(--color-teal-bright)" }} /> Local-only progress
+                  <CheckCircle size={14} style={{ color: "var(--color-teal-bright)" }} /> Cloud-saved progress
                 </span>
                 <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                   <CheckCircle size={14} style={{ color: "var(--color-teal-bright)" }} /> Clearable chat history
@@ -260,6 +262,7 @@ export default function LearnPage({ params }: { params: { locale: string } }) {
               submitLabel={t.waitlistBtn}
               previewNotice={t.waitlistPreview}
               blockedNotice={t.waitlistBlocked}
+              successNotice={t.waitlistSuccess}
             />
           </div>
         </div>

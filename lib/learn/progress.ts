@@ -1,3 +1,5 @@
+import { scheduleCloudSync } from "./cloud-sync";
+
 export const PROGRESS_KEY = "savannamind-learn-progress-v2";
 
 export type ModuleProgress = {
@@ -52,6 +54,7 @@ export function loadProgress(): LearnProgress {
 export function saveProgress(p: LearnProgress) {
   if (typeof window === "undefined") return;
   localStorage.setItem(PROGRESS_KEY, JSON.stringify(p));
+  scheduleCloudSync();
 }
 
 export function getModuleProgress(progress: LearnProgress, moduleId: string): ModuleProgress {

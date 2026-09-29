@@ -18,6 +18,7 @@ import {
 } from "@/lib/learn/progress";
 import type { LearnProfile } from "@/lib/learn/types";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/supabase/auth-context";
 
 export function LearnHub({
   profile,
@@ -27,6 +28,7 @@ export function LearnHub({
   locale: "en" | "sw";
 }) {
   const isSw = locale === "sw";
+  const { signOut } = useAuth();
   const reduce = useReducedMotion();
   const [progress, setProgress] = useState<LearnProgress>(() => loadProgress());
   const [blurContinue, setBlurContinue] = useState(true);
@@ -95,7 +97,18 @@ export function LearnHub({
         <Image src="/logo-full.png" alt="savannamind" width={120} height={32} />
         <div className="learn-hub-actions">
           <span className="learn-topbar-chip">{progress.totalXp} XP</span>
-          <Button variant="outline" size="sm" href={`/${locale}/login`}>{isSw ? "Akaunti" : "Account"}</Button>
+          <Button
+            variant="outline"
+            size="sm"
+            type="button"
+            onClick={() => {
+              void signOut().then(() => {
+                window.location.href = `/${locale}/login`;
+              });
+            }}
+          >
+            {isSw ? "Toka" : "Sign out"}
+          </Button>
           <Button variant="outline" size="sm" href={`/${locale}/learn/studio?onboarding=1`}>{isSw ? "Anza Upya" : "New Learner"}</Button>
           <Button variant="outline" size="sm" href={`/${locale}`}>{isSw ? "Toka kwenye tovuti" : "Exit to website"}</Button>
         </div>

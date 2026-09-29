@@ -1,3 +1,5 @@
+import { scheduleCloudSync } from "./cloud-sync";
+
 const KEY = "savannamind-learn-quiz-state-v1";
 
 export type QuizProgressState = {
@@ -32,6 +34,7 @@ export function loadQuizProgress(): QuizProgressState {
 export function saveQuizProgress(state: QuizProgressState) {
   if (typeof window === "undefined") return;
   localStorage.setItem(KEY, JSON.stringify(state));
+  scheduleCloudSync();
 }
 
 export function recordUnitVariantUsed(unitId: string, variant: string) {

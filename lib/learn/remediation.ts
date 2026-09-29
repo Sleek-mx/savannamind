@@ -1,4 +1,5 @@
 import { loadQuizProgress } from "./quiz-progress";
+import { scheduleCloudSync } from "./cloud-sync";
 
 const REMEDIATION_KEY = "savannamind-learn-remediation-v1";
 
@@ -28,6 +29,7 @@ export function loadRemediation(): RemediationState {
 export function saveRemediation(state: RemediationState) {
   if (typeof window === "undefined") return;
   localStorage.setItem(REMEDIATION_KEY, JSON.stringify(state));
+  scheduleCloudSync();
 }
 
 export function clearRemediation() {

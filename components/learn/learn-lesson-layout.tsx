@@ -7,6 +7,7 @@ import { Lock, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ResolvedModule } from "@/lib/learn/curriculum/types";
 import { Button } from "@/components/ui/button";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { previewModules, type ModuleCard } from "@/lib/learn/modules";
 import { isModuleUnlocked, loadProgress, type LearnProgress } from "@/lib/learn/progress";
 
@@ -78,6 +79,7 @@ export function LearnLessonLayout({
         <div className="learn-lesson-topbar-actions">
           <span className="learn-lesson-topbar-level">{isSw ? "Kiwango" : "Level"}: {module.level}</span>
           <Button href={`/${locale}/learn/studio`} variant="outline" size="sm">{isSw ? "Dashibodi" : "Back to dashboard"}</Button>
+          <SignOutButton locale={locale} />
         </div>
       </header>
 

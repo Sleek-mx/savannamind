@@ -22,6 +22,7 @@ import { LearnHub } from "@/components/learn/learn-hub";
 import { Button } from "@/components/ui/button";
 import { GetStartedButton } from "@/components/ui/get-started-button";
 import { ContinueButton } from "@/components/ui/continue-button";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { SectorCardDropdown } from "@/components/ui/card-dropdown";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -269,9 +270,12 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
 
       {phase !== "splash" && <header className="relative z-10 flex items-center justify-between px-6 py-5 max-w-6xl mx-auto">
         <Image src="/logo-full.png" alt="savannamind" width={160} height={44} priority />
-        {phase !== "cooking" && (
-          <OnboardingLocaleSwitch locale={locale} />
-        )}
+        <div className="flex items-center gap-2">
+          {phase !== "cooking" && (
+            <OnboardingLocaleSwitch locale={locale} />
+          )}
+          <SignOutButton locale={locale} />
+        </div>
       </header>}
 
       {phase === "splash" && (
@@ -749,5 +753,4 @@ function SplashLogo() {
     </div>
   );
 }
-
 

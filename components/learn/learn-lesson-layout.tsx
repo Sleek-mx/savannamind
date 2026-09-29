@@ -78,7 +78,10 @@ export function LearnLessonLayout({
         </div>
         <div className="learn-lesson-topbar-actions">
           <span className="learn-lesson-topbar-level hidden sm:inline">{isSw ? "Kiwango" : "Level"}: {module.level}</span>
-          <Button href={`/${locale}/learn/studio`} variant="outline" size="sm">{isSw ? "Dashibodi" : "Back to dashboard"}</Button>
+          <Button href={`/${locale}/learn/studio`} variant="outline" size="sm">
+            <span className="hidden sm:inline">{isSw ? "Rudi kwenye dashibodi" : "Back to dashboard"}</span>
+            <span className="sm:hidden">{isSw ? "Dashibodi" : "Dashboard"}</span>
+          </Button>
           <SignOutButton locale={locale} />
         </div>
       </header>

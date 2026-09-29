@@ -44,7 +44,8 @@ Aina tano za mfumo zinashughulikia karibu kila ombi utakalosikia. Jifunze kuzita
 
 Tumia sheria sera ikiwa tayari imeandikwa na isipaswi kubadilika yenyewe. Tumia jedwali-na-mtu kiasi kikiwa kidogo, uamuzi ukiwa wa eneo, au jibu la kosa la kiotomatiki likiwa gumu kubatilisha. Tumia urejeshaji ukweli ukiishaishi katika nyaraka mnazodhibiti. Tumia ujifunzaji wa mashine mnapokuwa na mifano ya kutosha yenye lebo, tokeo wazi, na mtu atakayetenda kwa alama. Tumia chatbot kazi ikiwa ni kuandaa rasimu au kujibu kwa lugha — na tu kwa ukaguzi wa mwanadamu kwa chochote kinachogusa pesa, afya, nidhamu au hali ya kisheria.
 
-Jaribio lenye manufaa: ikiwa huwezi kusema kwa sentensi moja nini kinaingia, nini kinatoka, nani anatumia tokeo, na atafanya nini linapokuwa na kosa, bado hujaiva kununua au kujenga chochote. Bado uko kwenye tatizo, si kwenye zana.`
+Jaribio lenye manufaa: ikiwa huwezi kusema kwa sentensi moja nini kinaingia, nini kinatoka, nani anatumia tokeo, na atafanya nini linapokuwa na kosa, bado hujaiva kununua au kujenga chochote. Bado uko kwenye tatizo, si kwenye zana.`,
+        "/learn/content/m0/ai-architecture-lab.jpg"
       ),
       reveal([
         {

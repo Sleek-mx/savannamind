@@ -91,7 +91,7 @@ export function AuthSplitLayout({ locale, mode, children }: AuthSplitLayoutProps
         <div className="auth-split__hero-scrim" />
       </div>
 
-      <div className="auth-split__panel">
+      <main className="auth-split__panel">
         <div className="auth-split__card">
           <div className="auth-split__top">
             <Link href={`/${locale}`} className="auth-split__logo" aria-label="Savanna Mind home">
@@ -111,13 +111,13 @@ export function AuthSplitLayout({ locale, mode, children }: AuthSplitLayoutProps
           {mode !== "reset" ? (
             <p className="auth-split__legal">
               {isSw ? "Una swali kuhusu faragha au akaunti yako?" : "Questions about privacy or your account?"}{" "}
-              <Link href={`/${locale}/contact`}>
+              <a href="mailto:info@savannamind.com">
                 {isSw ? "Wasiliana nasi" : "Contact us"}
-              </Link>
+              </a>
             </p>
           ) : null}
         </div>
-      </div>
+      </main>
     </div>
   );
 }

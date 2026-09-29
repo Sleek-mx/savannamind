@@ -7,11 +7,20 @@ const intlMiddleware = createIntlMiddleware(routing);
 
 const STUDIO_PATH = /^\/(en|sw)\/learn\/studio(\/|$)/;
 /**
- * The public site root currently opens the auth flow (login) instead of the
- * marketing home page. Set to `false` to restore the marketing landing page.
+ * The public marketing website has been removed from the app. The locale root
+ * and the retired public pages now open the auth entry screen instead.
  */
-const ROOT_REDIRECTS_TO_LOGIN = true;
 const LOCALE_ROOT = /^\/(en|sw)\/?$/;
+const RETIRED_SITE_PATH =
+  /^\/(en|sw)\/(about|contact|focus-areas|learn|projects|resources)\/?$/;
+
+function loginUrlFor(request: NextRequest) {
+  const locale = request.nextUrl.pathname.split("/")[1] || routing.defaultLocale;
+  const url = request.nextUrl.clone();
+  url.pathname = `/${locale}/login`;
+  url.search = "";
+  return url;
+}
 
 export async function middleware(request: NextRequest) {
   const { response: supabaseResponse, user } = await updateSession(request);
@@ -19,18 +28,12 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isStudio = STUDIO_PATH.test(pathname);
 
-  if (ROOT_REDIRECTS_TO_LOGIN && LOCALE_ROOT.test(pathname)) {
-    const locale = pathname.split("/")[1] || routing.defaultLocale;
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = `/${locale}/login`;
-    loginUrl.search = "";
-    return NextResponse.redirect(loginUrl);
+  if (LOCALE_ROOT.test(pathname) || RETIRED_SITE_PATH.test(pathname)) {
+    return NextResponse.redirect(loginUrlFor(request));
   }
 
   if (isStudio && !user) {
-    const locale = pathname.split("/")[1] || routing.defaultLocale;
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = `/${locale}/login`;
+    const loginUrl = loginUrlFor(request);
     loginUrl.searchParams.set("next", pathname + request.nextUrl.search);
     return NextResponse.redirect(loginUrl);
   }

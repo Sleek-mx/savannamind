@@ -24,7 +24,8 @@ Competitive advantage here is rarely a secret model. It is a dated price list no
 
 Mkakati wa Kitaifa wa AI wa Kenya 2025–2030 unataja MSME kati ya maeneo ya kipaumbele na unasisitiza ujuzi, data, miundombinu na maadili. Tafsiri ya SME yako: chagua mtiririko mmoja ambao tayari una daftari, weka binadamu kwenye kila hatua ya pesa, pima kwa KES, na ukatae hadithi za wauzaji zinazoruka KYC.
 
-Faida ya ushindani hapa si mara nyingi modeli ya siri. Ni orodha ya bei yenye tarehe ambayo mwingine hana, safu ya upotevu jirani haineweki, na wafanyakazi watakaoinua suala badala ya kukisia. Mshindani anaweza kununua chatbot ileile kesho. Hawezi kununua daftari lako la Jumamosi lililolinganishwa.`
+Faida ya ushindani hapa si mara nyingi modeli ya siri. Ni orodha ya bei yenye tarehe ambayo mwingine hana, safu ya upotevu jirani haineweki, na wafanyakazi watakaoinua suala badala ya kukisia. Mshindani anaweza kununua chatbot ileile kesho. Hawezi kununua daftari lako la Jumamosi lililolinganishwa.`,
+        "/learn/content/biz/enterprise-operations-hub.jpg"
       ),
       reveal([
         {

@@ -37,7 +37,8 @@ Uamuzi wa usanifu unaoamua kama hii inasaidia darasa la Kenya:
 
 Ulikutana na utafutaji-kwa-kubandika katika mfululizo wa kati. Hapa wazo lilelile ni mfumo: kuorodhesha, ruhusa, kumbukumbu, na kukataa ambako mkuu wa darasa hawezi kuzima. Walimu bado hukagua jaribio lolote mkufunzi analozalisha. Msingi unapunguza kubuni. Hauchukui nafasi ya mtahini.
 
-Mwongozo wa UNESCO wa 2023 unataka binadamu wawe wasimamizi wa kufundisha na tathmini. Mkufunzi mwenye msingi anayenukuu ukurasa kisha bado akimuomba mwanafunzi ajaribu hesabu unaendana. Mkufunzi mwenye msingi anayeandika kazi inayowasilishwa hauendani.`
+Mwongozo wa UNESCO wa 2023 unataka binadamu wawe wasimamizi wa kufundisha na tathmini. Mkufunzi mwenye msingi anayenukuu ukurasa kisha bado akimuomba mwanafunzi ajaribu hesabu unaendana. Mkufunzi mwenye msingi anayeandika kazi inayowasilishwa hauendani.`,
+        "/learn/content/edu/education-policy-analytics.jpg"
       ),
       reveal([
         {

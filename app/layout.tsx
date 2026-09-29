@@ -4,45 +4,22 @@ import { AppProviders } from "@/components/app-providers";
 
 export const metadata: Metadata = {
   title: {
-    default: "savanna mind — Where Algorithms Serve Communities",
-    template: "%s | savanna mind",
+    default: "Savanna Mind — Learn Practical AI",
+    template: "%s | Savanna Mind",
   },
   description:
-    "savanna mind builds intelligent systems that put people and communities first.",
-  applicationName: "savanna mind",
+    "Sign in to Savanna Mind and build practical AI skills for Africa through guided lessons and hands-on practice.",
+  applicationName: "Savanna Mind",
   keywords: [
-    "savanna mind",
-    "AI for communities",
-    "intelligent systems",
-    "human-centered AI",
+    "Savanna Mind",
+    "AI learning",
+    "practical AI skills",
+    "AI for Africa",
     "Kenya",
   ],
-  authors: [{ name: "savanna mind" }],
-  creator: "savanna mind",
+  authors: [{ name: "Savanna Mind" }],
+  creator: "Savanna Mind",
   metadataBase: new URL("https://savannamind.com"),
-  openGraph: {
-    type: "website",
-    siteName: "savanna mind",
-    title: "savanna mind — Where Algorithms Serve Communities",
-    description:
-      "We design intelligent systems that lift people up, one community at a time.",
-    images: [
-      {
-        url: "/hero-section.png",
-        width: 1200,
-        height: 630,
-        alt: "savanna mind — where algorithms serve communities",
-      },
-    ],
-    locale: "en_US",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "savanna mind — Where Algorithms Serve Communities",
-    description:
-      "We design intelligent systems that lift people up, one community at a time.",
-    images: ["/hero-section.png"],
-  },
   icons: {
     icon: "/logo-mark.png",
     shortcut: "/logo-mark.png",
@@ -53,8 +30,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0B1F26",
-  colorScheme: "dark",
+  themeColor: "#ffffff",
+  colorScheme: "light",
 };
 
 export default function RootLayout({

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import {
   isLocale,
   type Locale,
-} from "@/components/site-header";
+} from "@/lib/i18n/locale";
 import { routing } from "@/i18n/routing";
 
 export function generateStaticParams() {
@@ -12,14 +12,14 @@ export function generateStaticParams() {
 
 const seo = {
   en: {
-    title: "Advancing AI for Africa’s Future",
+    title: "Savanna Mind — Learn Practical AI",
     description:
-      "savanna mind advances AI for Africa’s future across healthcare, climate, and food security through learning, research, and an innovation lab.",
+      "Sign in to Savanna Mind and build practical AI skills for Africa through guided lessons and hands-on practice.",
   },
   sw: {
-    title: "Kuendeleza Akili Bandia kwa Mustakabali wa Afrika",
+    title: "Savanna Mind — Jifunze AI kwa Vitendo",
     description:
-      "savanna mind inaendeleza Akili Bandia kwa mustakabali wa Afrika katika afya, tabianchi, na usalama wa chakula kupitia ujifunzaji, utafiti, na maabara ya ubunifu.",
+      "Ingia Savanna Mind na ujenge ujuzi wa AI kwa vitendo kwa Afrika kupitia masomo yanayoongozwa na mazoezi ya vitendo.",
   },
 } as const;
 

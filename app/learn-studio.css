@@ -24,21 +24,6 @@
   --learn-shadow-lg: 0 20px 54px rgba(30, 42, 46, 0.13);
 }
 
-body.learn-studio-route .site-header,
-body.learn-studio-route .site-footer,
-body.learn-studio-route .skip-link,
-body.auth-route .site-header,
-body.auth-route .site-footer,
-body.auth-route .skip-link {
-  display: none !important;
-}
-
-body.learn-studio-route .site-shell,
-body.auth-route .site-shell {
-  max-width: none;
-  padding: 0;
-}
-
 .learn-studio {
   color: var(--learn-ink);
   background: var(--learn-cream);
@@ -480,7 +465,7 @@ body.auth-route .site-shell {
 
 .learn-lesson-topbar-back {
   font-weight: 700;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--learn-teal);
@@ -527,6 +512,7 @@ body.auth-route .site-shell {
   align-items: center;
   gap: 0.45rem;
   max-width: 15rem;
+  min-height: 2.75rem;
   padding: 0.45rem 0.8rem;
   border-radius: 999px;
   border: 1px solid var(--learn-teal-border);
@@ -560,7 +546,7 @@ body.auth-route .site-shell {
   min-width: 1.35rem;
   height: 1.35rem;
   border-radius: 999px;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 800;
   background: var(--learn-teal-soft);
   color: var(--learn-teal);
@@ -883,7 +869,7 @@ body.auth-route .site-shell {
 }
 
 .learn-lesson-sidebar-eyebrow {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -951,7 +937,7 @@ body.auth-route .site-shell {
 
 .learn-lesson-module-badge {
   margin-left: auto;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -972,7 +958,7 @@ body.auth-route .site-shell {
 }
 
 .learn-lesson-sidebar-title {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -1103,11 +1089,11 @@ body.auth-route .site-shell {
 }
 
 .lesson-kind-label {
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--learn-gold);
+  color: #96600a;
   margin-bottom: 0.35rem;
 }
 
@@ -2004,7 +1990,7 @@ body.auth-route .site-shell {
 
 .certificate-label {
   margin-top: 1.5rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--learn-teal);
@@ -2036,7 +2022,7 @@ body.auth-route .site-shell {
 
 .certificate-disclaimer {
   margin-top: 1.25rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--learn-muted);
 }
 
@@ -2612,4 +2598,38 @@ body.auth-route .site-shell {
   background: rgba(11, 95, 98, 0.4);
 }
 
+/* ============================================================
+   Mobile lesson chrome — keep the top bar inside the viewport
+   ============================================================ */
+@media (max-width: 640px) {
+  .learn-lesson-topbar {
+    gap: 0.5rem;
+    padding: 0.6rem 0.85rem;
+  }
 
+  .learn-lesson-topbar-brand {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
+
+  /* The "Lesson • unit title" row is a shrink-to-fit column child; cap the
+     title so the row can never push the top bar past the viewport. */
+  .learn-lesson-topbar-brand .truncate {
+    max-width: 5.5rem;
+  }
+
+  .learn-lesson-topbar-brand > a {
+    min-height: 44px;
+  }
+
+  .learn-lesson-topbar-actions {
+    flex: 0 0 auto;
+    gap: 0.4rem;
+  }
+
+  .learn-lesson-topbar-actions :is(a, button) {
+    padding-inline: 0.7rem;
+    min-height: 2.75rem;
+  }
+}

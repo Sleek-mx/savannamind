@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { LearnStudioApp } from "@/components/learn/learn-studio-app";
-import { isLocale, type Locale } from "@/components/site-header";
+import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { routing } from "@/i18n/routing";
 
 export function generateStaticParams() {

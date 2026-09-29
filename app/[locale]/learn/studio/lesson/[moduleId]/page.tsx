@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { LearnLessonShell } from "@/components/learn/learn-lesson-shell";
 import { moduleCurricula } from "@/lib/learn/curriculum/modules";
-import { isLocale, type Locale } from "@/components/site-header";
+import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { routing } from "@/i18n/routing";
 
 const moduleIds = ["m0", "agr", "hlt", "edu", "biz", "cap"];

@@ -30,7 +30,8 @@ Kamati inayofanya kazi ya kaunti inajumuisha: msimamizi wa matibabu au mkurugenz
 
 Bidhaa ya kwanza ya kamati ni kusudi la ukurasa mmoja: uamuzi gani zana inasaidia, nani anawajibika, njia ipi ya MOH isipaswi kuruka, na swichi ya kusimamisha — nani anaweza kuisimamisha baada ya tukio la usalama. Bila mtu aliye na jina wa kusimamisha, una hobby, si usimamizi.
 
-Somo hili haledai bidhaa yoyote ni kifaa cha tiba, wala halibuni usahihi wa kitabibu. AmeriAfriAI na Zendawa zinaweza kutajwa tu kama majaribio yaliyoripotiwa.`
+Somo hili haledai bidhaa yoyote ni kifaa cha tiba, wala halibuni usahihi wa kitabibu. AmeriAfriAI na Zendawa zinaweza kutajwa tu kama majaribio yaliyoripotiwa.`,
+        "/learn/content/hlt/clinical-imaging-review.jpg"
       ),
       reveal([
         {

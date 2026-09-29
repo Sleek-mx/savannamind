@@ -24,7 +24,8 @@ Foundations taught the machine learning lifecycle. This unit does not retrain a 
 
 Unauchora ili uone hatua zipi ni maneno (rasimu, tafsiri, muhtasari), zipi ni uamuzi (mkopo, kurejesha pesa, kumfukuza mfanyakazi), na zipi hazirejeleki (M-Pesa, kutoa bidhaa). AI inafaa kwenye hatua za maneno pamoja na ukaguzi wa binadamu. Haifai kwenye hatua zisizorejeleka. Tayari unajua hili kutoka mwanzoni; hapa unachora mnyororo ili mtu wa pili angeweza kuendesha duka vile vile.
 
-Misingi ilifundisha mzunguko wa ujifunzaji wa mashine. Kitengo hiki hakifundishi modeli upya. Kinauliza tu: wapi katika duka hili rasimu ingeokoa muda bila kusogeza pesa?`
+Misingi ilifundisha mzunguko wa ujifunzaji wa mashine. Kitengo hiki hakifundishi modeli upya. Kinauliza tu: wapi katika duka hili rasimu ingeokoa muda bila kusogeza pesa?`,
+        "/learn/content/biz/sme-inventory-forecast.jpg"
       ),
       reveal([
         {

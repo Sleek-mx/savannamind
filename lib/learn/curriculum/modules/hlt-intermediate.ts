@@ -29,7 +29,8 @@ Kuna njia kuu mbili za kujenga CDS. CDS ya kanuni huandika mwongozo kama mantiki
 
 Mahali CDS inapowekwa katika huduma ni muhimu kama jinsi ilivyojengwa. Inaweza kufanya kazi kabla ya ziara (nani aonwe kwanza), wakati wa ziara (ujumbe ndani ya fomu ya mashauriano) au baada yake (orodha ya kila siku ya wagonjwa waliochelewa kufuatiliwa). Kila mahali hubadilisha nani anaona matokeo, ana muda gani, na nini kinatokea matokeo yakiwa na kosa.
 
-Alama ni nzuri kadiri data inayoingizwa ilivyo nzuri. Ikiwa dalili muhimu zinarekodiwa mara mbili kwa siku, alama ya "papo hapo" ya onyo la mapema kwa kweli ni alama ya mara mbili kwa siku. Ikiwa modeli ilifunzwa katika hospitali ya rufaa, inaweza kukosea wagonjwa wa zahanati yenye vifaa tofauti na tabia tofauti za kurekodi.`
+Alama ni nzuri kadiri data inayoingizwa ilivyo nzuri. Ikiwa dalili muhimu zinarekodiwa mara mbili kwa siku, alama ya "papo hapo" ya onyo la mapema kwa kweli ni alama ya mara mbili kwa siku. Ikiwa modeli ilifunzwa katika hospitali ya rufaa, inaweza kukosea wagonjwa wa zahanati yenye vifaa tofauti na tabia tofauti za kurekodi.`,
+        "/learn/content/hlt/digital-clinic-triage.jpg"
       ),
       reveal([
         {

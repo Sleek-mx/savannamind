@@ -20,7 +20,8 @@ The key word is estimate. The system never sees what a child knows. It only sees
 
 Mfumo huu una sehemu tatu. Kwanza, benki ya maswali: mamia ya maswali, kila moja likiwa na alama ya ujuzi linaopima na ugumu wake. Pili, modeli ya mwanafunzi: makadirio yanayoendelea, kwa kila ujuzi, ya uwezekano kwamba mwanafunzi huyu ameumudu. Tatu, kanuni ya kuchagua: chagua swali linalofuata lenye manufaa zaidi kulingana na makadirio hayo, na utangaze kuwa ujuzi umemudiwa makadirio yanapovuka kiwango fulani, kwa mfano 0.95.
 
-Neno muhimu ni makadirio. Mfumo hauoni kamwe kile mtoto anachojua. Unaona tu majibu sahihi na yasiyo sahihi, na majibu hayo yana kelele: mwanafunzi anaweza kubahatisha akapata, au kuteleza kwenye jambo analolijua. Njia moja inayojulikana, Bayesian knowledge tracing, hushughulikia hili kwa kusasisha uwezekano wa umahiri baada ya kila jibu, ikizingatia kubahatisha na kuteleza. Dashibodi ikisema "amemudu", isome kama "modeli ina uhakika kiasi, kutokana na maswali iliyotoa". Huo ni ushahidi wenye manufaa, si hukumu. Tayari unajua kutoka Misingi kwamba utabiri si ukweli; hapa utabiri unamhusu mtoto.`
+Neno muhimu ni makadirio. Mfumo hauoni kamwe kile mtoto anachojua. Unaona tu majibu sahihi na yasiyo sahihi, na majibu hayo yana kelele: mwanafunzi anaweza kubahatisha akapata, au kuteleza kwenye jambo analolijua. Njia moja inayojulikana, Bayesian knowledge tracing, hushughulikia hili kwa kusasisha uwezekano wa umahiri baada ya kila jibu, ikizingatia kubahatisha na kuteleza. Dashibodi ikisema "amemudu", isome kama "modeli ina uhakika kiasi, kutokana na maswali iliyotoa". Huo ni ushahidi wenye manufaa, si hukumu. Tayari unajua kutoka Misingi kwamba utabiri si ukweli; hapa utabiri unamhusu mtoto.`,
+        "/learn/content/edu/collaborative-classroom-ai.jpg"
       ),
       reveal([
         {

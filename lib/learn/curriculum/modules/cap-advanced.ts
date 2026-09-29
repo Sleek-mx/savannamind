@@ -36,7 +36,8 @@ Usanifu unaostahili ukaguzi huandika mambo manne mapema:
 - Uboreshaji mdogo zaidi ambao ungehesabiwa, na madhara yatakayosimamisha kazi.
 - Mtathmini asiyepata bonus namba ikionekana nzuri.
 
-Hulazimishwi kuendesha jaribio la chuo kikuu. Unalazimishwa usijidanganye. Sajili kipimo mapema kwenye karatasi, weka tarehe, na ukishike hata wiki ya kwanza ikikatisha tamaa.`
+Hulazimishwi kuendesha jaribio la chuo kikuu. Unalazimishwa usijidanganye. Sajili kipimo mapema kwenye karatasi, weka tarehe, na ukishike hata wiki ya kwanza ikikatisha tamaa.`,
+        "/learn/content/cap/data-governance-board.jpg"
       ),
       reveal([
         {

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { CertificateView } from "@/components/learn/certificate-view";
-import { isLocale, type Locale } from "@/components/site-header";
+import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { routing } from "@/i18n/routing";
 
 export function generateStaticParams() {

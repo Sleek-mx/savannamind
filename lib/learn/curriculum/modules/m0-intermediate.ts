@@ -36,7 +36,8 @@ Mzunguko wa maisha wa ujifunzaji wa mashine ni maisha yote ya modeli, tangu swal
 - Kufuatilia: endelea kulinganisha matokeo yake na kinachotokea kweli, kwa sababu dunia hubadilika.
 - Kustaafisha: zima modeli, au weka nyingine mahali pake, inapoacha kusaidia au inapokuwa si salama tena.
 
-Kwa nini hili ni muhimu? Watu wengi hudhani ujifunzaji wa mashine ni hatua ya mafunzo pekee. Kwa kweli, makosa mengi hutokea kabla ya mafunzo (tatizo lililochaguliwa vibaya au data duni) au baada yake (hakuna anayeifuatilia modeli ikishaanza kutumika). Mzunguko huu ni duara, si mstari ulionyooka: unachojifunza wakati wa kufuatilia hukurudisha kurekebisha tatizo, data au modeli.`
+Kwa nini hili ni muhimu? Watu wengi hudhani ujifunzaji wa mashine ni hatua ya mafunzo pekee. Kwa kweli, makosa mengi hutokea kabla ya mafunzo (tatizo lililochaguliwa vibaya au data duni) au baada yake (hakuna anayeifuatilia modeli ikishaanza kutumika). Mzunguko huu ni duara, si mstari ulionyooka: unachojifunza wakati wa kufuatilia hukurudisha kurekebisha tatizo, data au modeli.`,
+        "/learn/content/m0/neural-lifecycle.jpg"
       ),
       reveal([
         {

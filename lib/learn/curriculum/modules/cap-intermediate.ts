@@ -42,7 +42,8 @@ Taarifa inayotumika inataja mambo matano:
 
 Ukiwa huwezi kukagua namba bila kuibuni, bado huna mradi. Kuuliza chatbot "upotevu wa nyanya Kisumu ni kiasi gani?" si ukaguzi. Kusimama na mfanyabiashara na mizani ni ukaguzi.
 
-Huu ni nidhamu uleule uliotumia katika Misingi: utabiri si ukweli. Hapa ukweli wa kwanza ni wa jamii, si wa modeli.`
+Huu ni nidhamu uleule uliotumia katika Misingi: utabiri si ukweli. Hapa ukweli wa kwanza ni wa jamii, si wa modeli.`,
+        "/learn/content/cap/community-capstone-demo.jpg"
       ),
       reveal([
         {

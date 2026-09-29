@@ -73,18 +73,19 @@ const copy = {
 export function AuthSplitLayout({ locale, mode, children }: AuthSplitLayoutProps) {
   const isSw = locale === "sw";
   const t = isSw ? copy.sw : copy.en;
-  const block = mode === "login" ? t.login : t.signup;
+  const block = t[mode];
   const otherPath = mode === "login" ? "signup" : "login";
+  const overlay = mode === "signup";
 
   return (
-    <div className="auth-split standalone-auth">
+    <div className={`auth-split standalone-auth${overlay ? " auth-split--overlay" : ""}`}>
       <div className="auth-split__hero" aria-hidden="true">
         <Image
-          src="/auth/signup-hero.jpg"
+          src={overlay ? "/auth/signup-background.jpg" : "/auth/signup-hero.jpg"}
           alt=""
           fill
           priority
-          sizes="(max-width: 768px) 200vw, 116vw"
+          sizes={overlay ? "100vw" : "(max-width: 768px) 200vw, 116vw"}
           className="auth-split__hero-img"
         />
         <div className="auth-split__hero-scrim" />

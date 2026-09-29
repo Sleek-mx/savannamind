@@ -167,6 +167,7 @@ body.auth-route .site-shell {
 
 .auth-split__hero {
   position: relative;
+  overflow: hidden;
   min-height: 100vh;
   min-height: 100dvh;
 }
@@ -399,6 +400,48 @@ body.auth-route .site-shell {
   text-decoration: underline;
 }
 
+/* Signup keeps the supplied photograph visible behind a readable form card. */
+.auth-split--overlay {
+  display: block;
+  position: relative;
+  isolation: isolate;
+  background: #173025;
+}
+
+.auth-split--overlay .auth-split__hero {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  z-index: -1;
+}
+
+.auth-split--overlay .auth-split__hero-img {
+  width: 100% !important;
+  object-position: center;
+}
+
+.auth-split--overlay .auth-split__hero-scrim {
+  background: linear-gradient(90deg, rgba(8, 30, 20, 0.03) 30%, rgba(8, 30, 20, 0.34));
+}
+
+.auth-split--overlay .auth-split__panel {
+  position: relative;
+  width: min(100%, 36rem);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin-left: auto;
+  background: transparent;
+}
+
+.auth-split--overlay .auth-split__card {
+  width: 100%;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 1.5rem 4rem rgba(9, 27, 18, 0.24);
+}
+
 @media (max-width: 768px) {
   .auth-split {
     grid-template-columns: 1fr;
@@ -425,6 +468,27 @@ body.auth-route .site-shell {
 
   .auth-split__subtitle {
     max-width: none;
+  }
+
+  .auth-split--overlay {
+    display: block;
+  }
+
+  .auth-split--overlay .auth-split__hero {
+    max-height: none;
+  }
+
+  .auth-split--overlay .auth-split__hero-img {
+    object-position: 27% center;
+  }
+
+  .auth-split--overlay .auth-split__panel {
+    width: 100%;
+    padding: clamp(9rem, 23vh, 12rem) 0.875rem 1.5rem;
+  }
+
+  .auth-split--overlay .auth-split__card {
+    padding: 1.5rem;
   }
 }
 

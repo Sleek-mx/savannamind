@@ -11,9 +11,23 @@ import type { LearnProfile } from "./types";
 import type { LearnProgress } from "./progress";
 import type { QuizProgressState } from "./quiz-progress";
 import { isCareerId, migrateLegacyCareer } from "./careers";
+import { randomUUID } from "node:crypto";
 
 const BUCKET = "learner-data";
 const statePath = (userId: string) => `${userId}/learn-state.json`;
+const stateDirectory = (userId: string) => `${userId}/states`;
+
+async function latestStatePath(userId: string): Promise<string> {
+  const admin = createAdminClient();
+  const { data, error } = await admin.storage.from(BUCKET).list(stateDirectory(userId), {
+    limit: 1,
+    sortBy: { column: "name", order: "desc" },
+  });
+  if (error) throw error;
+  return data?.[0]?.name
+    ? `${stateDirectory(userId)}/${data[0].name}`
+    : statePath(userId);
+}
 
 /** Max serialized learn-state size accepted for storage (and PUT bodies). */
 export const LEARN_STATE_MAX_BYTES = 512 * 1024;
@@ -33,7 +47,7 @@ function isStorageNotFound(error: unknown): boolean {
 
 export async function readCloudLearnState(userId: string): Promise<CloudLearnState> {
   const admin = createAdminClient();
-  const { data, error } = await admin.storage.from(BUCKET).download(statePath(userId));
+  const { data, error } = await admin.storage.from(BUCKET).download(await latestStatePath(userId));
   if (error || !data) {
     if (error && !isStorageNotFound(error)) {
       // Real Storage failure — surface it instead of falling back to empty.
@@ -72,12 +86,26 @@ export async function writeCloudLearnState(userId: string, state: CloudLearnStat
   if (body.length > LEARN_STATE_MAX_BYTES) {
     throw new Error("Learn state exceeds maximum allowed size");
   }
-  const { error } = await admin.storage.from(BUCKET).upload(statePath(userId), body, {
-    upsert: true,
+  // A new object path on each save avoids stale reads from Storage's CDN.
+  const path = `${stateDirectory(userId)}/${Date.now()}-${randomUUID()}.json`;
+  const { error } = await admin.storage.from(BUCKET).upload(path, body, {
+    upsert: false,
+    cacheControl: "0",
     contentType: "application/json",
   });
   if (error) throw error;
   await syncTablesFromState(userId, state);
+
+  // Keep two previous snapshots for recovery without unbounded Storage growth.
+  const { data: versions, error: listError } = await admin.storage.from(BUCKET).list(stateDirectory(userId), {
+    limit: 100,
+    sortBy: { column: "name", order: "desc" },
+  });
+  if (!listError && versions && versions.length > 3) {
+    await admin.storage.from(BUCKET).remove(
+      versions.slice(3).map((item) => `${stateDirectory(userId)}/${item.name}`)
+    );
+  }
 }
 
 async function readStateFromTables(userId: string): Promise<CloudLearnState | null> {

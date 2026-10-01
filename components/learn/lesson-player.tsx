@@ -46,6 +46,9 @@ import { Button } from "@/components/ui/button";
 import { DefinitionFlipCards } from "@/components/learn/definition-flip-cards";
 import { FlashcardBullets, extractBulletLines } from "@/components/learn/flashcard-bullets";
 import { PromptBuilderCard } from "@/components/learn/prompt-builder-card";
+import { VoicePlayer } from "@/components/learn/voice-player";
+import { MatchTapCard } from "@/components/learn/match-tap-card";
+import { DiscussionPromptCard } from "@/components/learn/discussion-prompt-card";
 import { TimedQuizRunner } from "@/components/learn/timed-quiz-runner";
 import { LearnLessonLayout } from "@/components/learn/learn-lesson-layout";
 import type { CardContext } from "@/lib/learn/card-context";
@@ -194,8 +197,13 @@ export function LessonPlayer({
       return;
     }
     let title = isSw ? "Kadi" : "Card";
-    if (card.type === "video" || card.type === "prompt-builder") {
-      title = isSw ? card.titleSw : card.titleEn;
+    if (
+      card.type === "video" ||
+      card.type === "prompt-builder" ||
+      card.type === "match-tap" ||
+      card.type === "discussion-prompt"
+    ) {
+      title = (isSw ? card.titleSw : card.titleEn) ?? title;
     } else if (card.type === "quiz") {
       title = isSw ? card.titleSw ?? title : card.titleEn ?? title;
     }
@@ -653,6 +661,11 @@ export function LessonPlayer({
                     locale={locale}
                   />
               )}
+              <VoicePlayer
+                text={`${isSw ? card.titleSw : card.titleEn}. ${isSw ? card.bodySw : card.bodyEn}`}
+                locale={locale}
+                title={isSw ? card.titleSw : card.titleEn}
+              />
               <FlashcardBullets
                 title={isSw ? card.titleSw : card.titleEn}
                 body={isSw ? card.bodySw : card.bodyEn}
@@ -726,6 +739,36 @@ export function LessonPlayer({
               </p>
               <h1>{isSw ? card.titleSw : card.titleEn}</h1>
               <PromptBuilderCard
+                card={card}
+                locale={locale}
+                onSolved={() => setSolvedCurrent(true)}
+              />
+              {solvedCurrent && (
+                <Button onClick={next} className="mt-4">
+                  {isSw ? "Endelea" : "Continue"}
+                </Button>
+              )}
+            </>
+          )}
+
+          {card.type === "match-tap" && (
+            <>
+              <MatchTapCard
+                card={card}
+                locale={locale}
+                onSolved={() => setSolvedCurrent(true)}
+              />
+              {solvedCurrent && (
+                <Button onClick={next} className="mt-4">
+                  {isSw ? "Endelea" : "Continue"}
+                </Button>
+              )}
+            </>
+          )}
+
+          {card.type === "discussion-prompt" && (
+            <>
+              <DiscussionPromptCard
                 card={card}
                 locale={locale}
                 onSolved={() => setSolvedCurrent(true)}
@@ -858,7 +901,7 @@ function QuizView({
       {!solved && (hintFor || fallbackHint) && (
         <div className="lesson-quiz-remediate" role="status">
           <p className="lesson-quiz-remediate-title">
-            {isSw ? "Si sahihi — jaribu tena:" : "Not quite — try again:"}
+            {isSw ? "🐾 Kibo: Si sahihi bado, hebu tuchunguze tena:" : "🐾 Kibo: Not quite yet — let's check the clue:"}
           </p>
           <p>{hintFor || fallbackHint}</p>
         </div>
@@ -867,7 +910,7 @@ function QuizView({
       {solved && (card.explainEn || card.explainSw) && (
         <div className="lesson-quiz-explain" role="status">
           <p className="lesson-quiz-remediate-title">
-            {isSw ? "Sahihi!" : "Correct!"}
+            {isSw ? "🐾 Kibo: Umepatia barabara! 🎉" : "🐾 Kibo: Spot on! 🎉"}
           </p>
           <p>{isSw ? card.explainSw : card.explainEn}</p>
         </div>

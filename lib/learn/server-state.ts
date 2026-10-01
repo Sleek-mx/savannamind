@@ -321,6 +321,12 @@ export function parseCloudLearnState(body: unknown): ParsedLearnStateResult {
     if (!isBoundedString(rawProfile.createdAt, 40)) {
       return { ok: false, reason: "profile.createdAt invalid" };
     }
+    const placementCompleted = typeof rawProfile.placementCompleted === "boolean" ? rawProfile.placementCompleted : undefined;
+    const placementScore = isFiniteNumber(rawProfile.placementScore) ? rawProfile.placementScore : undefined;
+    const placementAnswers = isPlainObject(rawProfile.placementAnswers)
+      ? (rawProfile.placementAnswers as Record<string, string>)
+      : undefined;
+
     profile = {
       nickname: rawProfile.nickname,
       ageBand: rawProfile.ageBand,
@@ -329,6 +335,9 @@ export function parseCloudLearnState(body: unknown): ParsedLearnStateResult {
       guardianConfirmed: rawProfile.guardianConfirmed,
       locale: rawProfile.locale,
       onboardingComplete: rawProfile.onboardingComplete,
+      placementCompleted,
+      placementScore,
+      placementAnswers,
       tutorialSeen: true,
       createdAt: rawProfile.createdAt,
     };

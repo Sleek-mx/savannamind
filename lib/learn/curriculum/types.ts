@@ -58,6 +58,31 @@ export type LessonCard =
       /** Model answer shown after success. */
       sampleEn: string;
       sampleSw: string;
+    }
+  | {
+      type: "match-tap";
+      titleEn?: string;
+      titleSw?: string;
+      instructionEn?: string;
+      instructionSw?: string;
+      pairs: {
+        id: string;
+        termEn: string;
+        termSw: string;
+        matchEn: string;
+        matchSw: string;
+      }[];
+    }
+  | {
+      type: "discussion-prompt";
+      titleEn?: string;
+      titleSw?: string;
+      promptEn: string;
+      promptSw: string;
+      placeholderEn?: string;
+      placeholderSw?: string;
+      kiboHintEn?: string;
+      kiboHintSw?: string;
     };
 
 export type CurriculumUnit = {

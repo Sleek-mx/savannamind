@@ -14,6 +14,9 @@ export type LearnProfile = {
   guardianConfirmed: boolean;
   locale: "en" | "sw";
   onboardingComplete: boolean;
+  placementCompleted?: boolean;
+  placementScore?: number;
+  placementAnswers?: Record<string, string>;
   /** @deprecated Tutorial removed from product; kept for storage compat */
   tutorialSeen: boolean;
   createdAt: string;

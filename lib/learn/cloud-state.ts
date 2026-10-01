@@ -33,6 +33,9 @@ export type ProfileMeta = {
   locale: LearnProfile["locale"];
   guardianConfirmed: boolean;
   onboardingComplete: boolean;
+  placementCompleted?: boolean;
+  placementScore?: number;
+  placementAnswers?: Record<string, string>;
 };
 
 export function encodeProfileMeta(profile: LearnProfile): string {
@@ -41,6 +44,9 @@ export function encodeProfileMeta(profile: LearnProfile): string {
     locale: profile.locale,
     guardianConfirmed: profile.guardianConfirmed,
     onboardingComplete: profile.onboardingComplete,
+    placementCompleted: profile.placementCompleted,
+    placementScore: profile.placementScore,
+    placementAnswers: profile.placementAnswers,
   };
   return JSON.stringify(meta);
 }

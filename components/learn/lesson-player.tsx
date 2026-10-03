@@ -40,18 +40,24 @@ import {
   type QuizVariantId,
 } from "@/lib/learn/timed-quizzes-data";
 import { LearnBandVideo } from "@/components/learn/learn-band-video";
+import { GatedYouTube } from "@/components/learn/gated-youtube";
+import { ModuleGateQuiz } from "@/components/learn/module-gate-quiz";
+import { getModuleGate } from "@/lib/learn/curriculum/modules";
 import type { LearnProfile } from "@/lib/learn/types";
-import { previewModules } from "@/lib/learn/modules";
+import { moduleCard } from "@/lib/learn/modules";
 import { Button } from "@/components/ui/button";
 import { DefinitionFlipCards } from "@/components/learn/definition-flip-cards";
 import { FlashcardBullets, extractBulletLines } from "@/components/learn/flashcard-bullets";
 import { PromptBuilderCard } from "@/components/learn/prompt-builder-card";
+import { VoicePlayer } from "@/components/learn/voice-player";
+import { MatchTapCard } from "@/components/learn/match-tap-card";
+import { DiscussionPromptCard } from "@/components/learn/discussion-prompt-card";
 import { TimedQuizRunner } from "@/components/learn/timed-quiz-runner";
 import { LearnLessonLayout } from "@/components/learn/learn-lesson-layout";
 import type { CardContext } from "@/lib/learn/card-context";
 import { ConfettiButton, confetti } from "@/registry/magicui/confetti";
 
-type Gate = "cards" | "unit-quiz" | "module-exam" | "unit-pass" | "unit-fail";
+type Gate = "cards" | "unit-quiz" | "module-exam" | "module-gate" | "unit-pass" | "unit-fail";
 
 type Props = {
   module: ResolvedModule;
@@ -118,7 +124,7 @@ export function LessonPlayer({
   const reduce = useReducedMotion();
   const unit = module.units[unitIndex];
   const card = unit?.cards[cardIndex];
-  const meta = previewModules.find((m) => m.id === module.id);
+  const meta = moduleCard(module.id, module.level);
   const isSw = locale === "sw";
 
   const { flatIndex, totalCards } = useMemo(() => {
@@ -143,6 +149,10 @@ export function LessonPlayer({
   }, [wrongStreak, onStruggle]);
 
   const openModuleExam = useCallback(() => {
+    if (getModuleGate(module.id, module.level)) {
+      setGate("module-gate");
+      return;
+    }
     const key = moduleExamKey(module.id, module.level);
     const used = loadQuizProgress().moduleVariantsUsed[key] ?? [];
     const v = pickModuleVariantWithHistory(used);
@@ -194,8 +204,13 @@ export function LessonPlayer({
       return;
     }
     let title = isSw ? "Kadi" : "Card";
-    if (card.type === "video" || card.type === "prompt-builder") {
-      title = isSw ? card.titleSw : card.titleEn;
+    if (
+      card.type === "video" ||
+      card.type === "prompt-builder" ||
+      card.type === "match-tap" ||
+      card.type === "discussion-prompt"
+    ) {
+      title = (isSw ? card.titleSw : card.titleEn) ?? title;
     } else if (card.type === "quiz") {
       title = isSw ? card.titleSw ?? title : card.titleEn ?? title;
     }
@@ -335,7 +350,7 @@ export function LessonPlayer({
 
   if (finished) {
     const nextId = moduleOrder[moduleOrder.indexOf(module.id) + 1];
-    const nextMeta = nextId ? previewModules.find((m) => m.id === nextId) : null;
+    const nextMeta = nextId ? moduleCard(nextId, module.level) : null;
     return (
       <div className="lesson-complete">
         <motion.div
@@ -359,7 +374,7 @@ export function LessonPlayer({
                 {isSw ? `Endelea: ${nextMeta.titleSw}` : `Continue: ${nextMeta.titleEn}`}
               </Button>
             )}
-            {module.id === "cap" && (
+            {module.id === "s5" && (
               <Button variant="outline" href={`/${locale}/learn/studio/certificate`}>
                 {isSw ? "Angalia cheti (onyesho)" : "View certificate (preview)"}
               </Button>
@@ -532,6 +547,48 @@ export function LessonPlayer({
     );
   }
 
+  if (gate === "module-gate") {
+    const gateQuiz = getModuleGate(module.id, module.level);
+    if (gateQuiz) {
+      return (
+        <LearnLessonLayout
+          module={module}
+          locale={locale}
+          unitIndex={unitIndex}
+          maxUnitReached={maxUnitReached}
+          onUnitSelect={selectUnit}
+          kiboColumn={kiboColumn}
+          failedUnitIds={failedUnitIds}
+          moduleOrder={moduleOrder}
+        >
+          <ModuleGateQuiz
+            title={isSw ? gateQuiz.titleSw : gateQuiz.titleEn}
+            items={gateQuiz.items}
+            passCount={gateQuiz.passCount}
+            locale={locale}
+            onPass={() => {
+              const p = markModuleComplete(module.id, module.xpReward, module.units.length, {
+                quizPassed: true,
+              });
+              const mp = getModuleProgress(p, module.id);
+              if (mp.completed) {
+                clearModuleRemediation(module.id);
+                setFinished(true);
+              }
+            }}
+            onBackToNotes={(nextUnit) => {
+              setUnitIndex(nextUnit);
+              setCardIndex(0);
+              setMaxUnitReached((reached) => Math.max(reached, nextUnit));
+              saveLessonPosition(module.id, nextUnit, 0);
+              setGate("cards");
+            }}
+          />
+        </LearnLessonLayout>
+      );
+    }
+  }
+
   if (gate === "module-exam" && examBank && moduleQuestions.length > 0) {
     const examKey = moduleExamKey(module.id, module.level);
     return (
@@ -653,6 +710,11 @@ export function LessonPlayer({
                     locale={locale}
                   />
               )}
+              <VoicePlayer
+                text={`${isSw ? card.titleSw : card.titleEn}. ${isSw ? card.bodySw : card.bodyEn}`}
+                locale={locale}
+                title={isSw ? card.titleSw : card.titleEn}
+              />
               <FlashcardBullets
                 title={isSw ? card.titleSw : card.titleEn}
                 body={isSw ? card.bodySw : card.bodyEn}
@@ -665,25 +727,7 @@ export function LessonPlayer({
           )}
 
           {card.type === "video" && (
-            <>
-              <h1>{isSw ? card.titleSw : card.titleEn}</h1>
-              {(card.captionEn || card.captionSw) && (
-                <p className="lesson-video-caption">
-                  {isSw ? card.captionSw : card.captionEn}
-                </p>
-              )}
-              <div className="lesson-video">
-                <iframe
-                  title={isSw ? card.titleSw : card.titleEn}
-                  src={`https://www.youtube-nocookie.com/embed/${card.youtubeId}`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-              <Button onClick={next}>
-                {isSw ? "Nimeangalia — endelea" : "Watched — continue"}
-              </Button>
-            </>
+            <GatedYouTube card={card} locale={locale} onContinue={next} />
           )}
 
           {card.type === "reveal" && (
@@ -726,6 +770,36 @@ export function LessonPlayer({
               </p>
               <h1>{isSw ? card.titleSw : card.titleEn}</h1>
               <PromptBuilderCard
+                card={card}
+                locale={locale}
+                onSolved={() => setSolvedCurrent(true)}
+              />
+              {solvedCurrent && (
+                <Button onClick={next} className="mt-4">
+                  {isSw ? "Endelea" : "Continue"}
+                </Button>
+              )}
+            </>
+          )}
+
+          {card.type === "match-tap" && (
+            <>
+              <MatchTapCard
+                card={card}
+                locale={locale}
+                onSolved={() => setSolvedCurrent(true)}
+              />
+              {solvedCurrent && (
+                <Button onClick={next} className="mt-4">
+                  {isSw ? "Endelea" : "Continue"}
+                </Button>
+              )}
+            </>
+          )}
+
+          {card.type === "discussion-prompt" && (
+            <>
+              <DiscussionPromptCard
                 card={card}
                 locale={locale}
                 onSolved={() => setSolvedCurrent(true)}
@@ -858,7 +932,7 @@ function QuizView({
       {!solved && (hintFor || fallbackHint) && (
         <div className="lesson-quiz-remediate" role="status">
           <p className="lesson-quiz-remediate-title">
-            {isSw ? "Si sahihi — jaribu tena:" : "Not quite — try again:"}
+            {isSw ? "🐾 Kibo: Si sahihi bado, hebu tuchunguze tena:" : "🐾 Kibo: Not quite yet — let's check the clue:"}
           </p>
           <p>{hintFor || fallbackHint}</p>
         </div>
@@ -867,7 +941,7 @@ function QuizView({
       {solved && (card.explainEn || card.explainSw) && (
         <div className="lesson-quiz-explain" role="status">
           <p className="lesson-quiz-remediate-title">
-            {isSw ? "Sahihi!" : "Correct!"}
+            {isSw ? "🐾 Kibo: Umepatia barabara! 🎉" : "🐾 Kibo: Spot on! 🎉"}
           </p>
           <p>{isSw ? card.explainSw : card.explainEn}</p>
         </div>

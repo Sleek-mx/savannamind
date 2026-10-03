@@ -18,7 +18,7 @@ export type LearnProgress = {
   certificateIssuedAt?: string;
 };
 
-const MODULE_IDS = ["m0", "agr", "hlt", "edu", "biz", "cap"];
+const MODULE_IDS = ["s1", "s2", "s3", "s4", "s5"];
 
 export function loadProgress(): LearnProgress {
   if (typeof window === "undefined") {
@@ -108,13 +108,18 @@ export function setModuleFailedUnits(moduleId: string, unitIds: string[]) {
   return p;
 }
 
-export function markModuleComplete(moduleId: string, xpEarned: number, unitCount = 12) {
+export function markModuleComplete(
+  moduleId: string,
+  xpEarned: number,
+  unitCount = 4,
+  opts?: { quizPassed?: boolean }
+) {
   const p = loadProgress();
   const prev = getModuleProgress(p, moduleId);
   // Idempotent: replays and re-completions never mint extra XP.
   if (prev.completed) return p;
   const projectedXp = prev.xp + xpEarned;
-  if (projectedXp < moduleXpThreshold(unitCount)) {
+  if (!opts?.quizPassed && projectedXp < moduleXpThreshold(unitCount)) {
     p.modules[moduleId] = {
       ...prev,
       xp: projectedXp,

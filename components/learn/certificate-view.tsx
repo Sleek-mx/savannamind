@@ -9,7 +9,7 @@ import { deriveLearnerName } from "@/lib/learn/learner-name";
 import { useAuth } from "@/lib/supabase/auth-context";
 import { Button } from "@/components/ui/button";
 
-const REQUIRED = ["m0", "agr", "hlt", "edu", "biz", "cap"];
+const REQUIRED = ["s1", "s2", "s3", "s4", "s5"];
 
 export function CertificateView({ locale }: { locale: "en" | "sw" }) {
   const { user } = useAuth();
@@ -31,8 +31,8 @@ export function CertificateView({ locale }: { locale: "en" | "sw" }) {
         </h1>
         <p className="text-learn-muted mt-3">
           {isSw
-            ? "Maliza moduli zote sita kisha urudi hapa."
-            : "Complete all six modules, then return here."}
+            ? "Maliza moduli zote tano kisha urudi hapa."
+            : "Complete all five modules, then return here."}
         </p>
         <Button className="mt-8" href={`/${locale}/learn/studio`}>
           {isSw ? "Rudi dashibodi" : "Back to dashboard"}

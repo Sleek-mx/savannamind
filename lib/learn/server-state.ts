@@ -148,6 +148,11 @@ async function readStateFromTables(userId: string): Promise<CloudLearnState | nu
         guardianConfirmed: meta.guardianConfirmed ?? true,
         locale: meta.locale || "en",
         onboardingComplete: true,
+        placementCompleted: meta.placementCompleted,
+        placementScore: meta.placementScore,
+        placementAnswers: meta.placementAnswers,
+        outcomeBestScore: meta.outcomeBestScore,
+        outcomeCompletedAt: meta.outcomeCompletedAt,
         tutorialSeen: true,
         createdAt: profileRow.created_at || new Date().toISOString(),
       }
@@ -159,7 +164,7 @@ async function readStateFromTables(userId: string): Promise<CloudLearnState | nu
   };
 
   if (progressRow) {
-    const moduleId = progressRow.current_module_id || "m0";
+    const moduleId = progressRow.current_module_id || "s1";
     progress.modules[moduleId] = {
       moduleId,
       completed: (progressRow.completed_module_ids ?? []).includes(moduleId),
@@ -217,7 +222,7 @@ async function syncTablesFromState(userId: string, state: CloudLearnState) {
   }
 
   const activeModule =
-    Object.values(state.progress.modules).find((m) => !m.completed)?.moduleId ?? "m0";
+    Object.values(state.progress.modules).find((m) => !m.completed)?.moduleId ?? "s1";
   const active = state.progress.modules[activeModule];
   const completedIds = Object.entries(state.progress.modules)
     .filter(([, m]) => m.completed)
@@ -321,6 +326,22 @@ export function parseCloudLearnState(body: unknown): ParsedLearnStateResult {
     if (!isBoundedString(rawProfile.createdAt, 40)) {
       return { ok: false, reason: "profile.createdAt invalid" };
     }
+    const placementCompleted = typeof rawProfile.placementCompleted === "boolean" ? rawProfile.placementCompleted : undefined;
+    const placementScore = isFiniteNumber(rawProfile.placementScore) ? rawProfile.placementScore : undefined;
+    const placementAnswers = isPlainObject(rawProfile.placementAnswers)
+      ? (rawProfile.placementAnswers as Record<string, string>)
+      : undefined;
+    const outcomeBestScore = isFiniteNumber(rawProfile.outcomeBestScore) ? rawProfile.outcomeBestScore : undefined;
+    const outcomeCompletedAt = isBoundedString(rawProfile.outcomeCompletedAt, 40)
+      ? rawProfile.outcomeCompletedAt
+      : undefined;
+    if (placementScore !== undefined && (placementScore < 0 || placementScore > 12)) {
+      return { ok: false, reason: "profile.placementScore out of range" };
+    }
+    if (outcomeBestScore !== undefined && (outcomeBestScore < 0 || outcomeBestScore > 12)) {
+      return { ok: false, reason: "profile.outcomeBestScore out of range" };
+    }
+
     profile = {
       nickname: rawProfile.nickname,
       ageBand: rawProfile.ageBand,
@@ -329,6 +350,11 @@ export function parseCloudLearnState(body: unknown): ParsedLearnStateResult {
       guardianConfirmed: rawProfile.guardianConfirmed,
       locale: rawProfile.locale,
       onboardingComplete: rawProfile.onboardingComplete,
+      placementCompleted,
+      placementScore,
+      placementAnswers,
+      outcomeBestScore,
+      outcomeCompletedAt,
       tutorialSeen: true,
       createdAt: rawProfile.createdAt,
     };

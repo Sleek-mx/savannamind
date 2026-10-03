@@ -3,122 +3,151 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { OnboardingLocaleSwitch } from "@/components/learn/onboarding-locale-switch";
-import {
-  Questionnaire,
-  QuestionnaireActions,
-  QuestionnaireChoice,
-  QuestionnaireChoices,
-  QuestionnaireItem,
-  QuestionnaireNext,
-  QuestionnairePrevious,
-  QuestionnaireProgress,
-  QuestionnaireTitle,
-} from "@/components/ui/questionnaire";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { LearnHub } from "@/components/learn/learn-hub";
-import { Button } from "@/components/ui/button";
 import { GetStartedButton } from "@/components/ui/get-started-button";
 import { ContinueButton } from "@/components/ui/continue-button";
 import { SignOutButton } from "@/components/auth/sign-out-button";
-import { SectorCardDropdown } from "@/components/ui/card-dropdown";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
-import { ChevronDownIcon } from "lucide-react";
-import { GENERAL_CAREERS } from "@/lib/learn/general-careers";
-import {
-  ageOptions,
-  careerOptions,
-  careerQuestion,
-  cookingCopy,
-  levelOptions,
-  isOnboardingStep,
-  stepLabels,
-  type OnboardingStep,
-} from "@/lib/learn/copy";
 import { hydrateLearnStateFromCloud } from "@/lib/learn/cloud-sync";
 import { deriveLearnerName } from "@/lib/learn/learner-name";
-import { loadProfile, saveProfile, loadOnboardingDraft, saveOnboardingDraft, clearOnboardingDraft } from "@/lib/learn/storage";
+import { loadProfile, saveProfile } from "@/lib/learn/storage";
 import { useAuth } from "@/lib/supabase/auth-context";
-import type { AgeBand, CareerId, LearnLevel, LearnProfile } from "@/lib/learn/types";
+import type { LearnProfile } from "@/lib/learn/types";
+import {
+  PreAssessmentQuiz,
+  type PlacementResult,
+  PLACEMENT_DRAFT_KEY,
+} from "@/components/learn/pre-assessment-quiz";
+import { TurnstileGate } from "@/components/auth/turnstile-gate";
+import { OutcomeCheck } from "@/components/learn/outcome-check";
 
-type Phase = "splash" | "onboarding" | "cooking" | "home";
-
-function needsGuardian(age: AgeBand | null) {
-  return age === "kids";
-}
-
-const PREVIOUS_STEP: Record<OnboardingStep, OnboardingStep | null> = {
-  language: null,
-  age: "language",
-  career: "age",
-  level: "career",
-  guardian: "level",
-};
+type Phase = "splash" | "home" | "placement" | "outcome";
 
 export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const [phase, setPhase] = useState<Phase>("splash");
-  const [step, setStep] = useState<OnboardingStep>("language");
-  const [ageBand, setAgeBand] = useState<AgeBand | null>(null);
-  const [career, setCareer] = useState<CareerId | null>(null);
-  const [level, setLevel] = useState<LearnLevel | null>(null);
-  const [guardianConfirmed, setGuardianConfirmed] = useState(false);
   const [profile, setProfile] = useState<LearnProfile | null>(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [showTurnstile, setShowTurnstile] = useState(false);
+  const [pendingDestination, setPendingDestination] = useState<"home" | "placement" | "outcome" | null>(null);
+  const [introStage, setIntroStage] = useState(0);
+  const [introExiting, setIntroExiting] = useState(false);
+  const reduceMotion = useReducedMotion();
+
   const learnerName = useMemo(
     () => deriveLearnerName(user, locale === "sw" ? "Mwanafunzi" : "Learner"),
     [user, locale]
   );
-  const [profileLoaded, setProfileLoaded] = useState(false);
-  const [introStage, setIntroStage] = useState(0);
-  const [introExiting, setIntroExiting] = useState(false);
-  const reduceMotion = useReducedMotion();
+
+  const isReturningUser = useMemo(() => {
+    return Boolean(profile?.onboardingComplete && profile?.placementCompleted);
+  }, [profile]);
+
+  const proceedWithCaptchaCheck = useCallback(
+    (destination: "home" | "placement" | "outcome") => {
+      const hasPassedTurnstile =
+        typeof window !== "undefined" &&
+        sessionStorage.getItem("sm_turnstile_passed") === "true";
+
+      if (!hasPassedTurnstile) {
+        setPendingDestination(destination);
+        setShowTurnstile(true);
+        return;
+      }
+      window.setTimeout(() => setPhase(destination), reduceMotion ? 0 : 420);
+    },
+    [reduceMotion]
+  );
+
   const startStudio = useCallback(() => {
     if (!profileLoaded) return;
     setIntroExiting(true);
-    window.setTimeout(() => setPhase(profile?.onboardingComplete ? "home" : "onboarding"), reduceMotion ? 0 : 420);
-  }, [profile, profileLoaded, reduceMotion]);
-
-  const startNewOnboarding = useCallback(() => {
-    clearOnboardingDraft();
-    setStep("language");
-    setAgeBand(null);
-    setCareer(null);
-    setLevel(null);
-    setGuardianConfirmed(false);
-    setIntroExiting(true);
-    window.setTimeout(() => setPhase("onboarding"), reduceMotion ? 0 : 420);
-  }, [reduceMotion]);
+    proceedWithCaptchaCheck("home");
+  }, [proceedWithCaptchaCheck, profileLoaded]);
 
   const continueTraining = useCallback(() => {
     setIntroExiting(true);
-    window.setTimeout(() => setPhase("home"), reduceMotion ? 0 : 420);
-  }, [reduceMotion]);
+    proceedWithCaptchaCheck("home");
+  }, [proceedWithCaptchaCheck]);
+
+  const handleTurnstileVerified = useCallback(() => {
+    setShowTurnstile(false);
+    const dest = pendingDestination || "home";
+    setPendingDestination(null);
+    setPhase(dest);
+  }, [pendingDestination]);
+
+  const handlePlacementComplete = useCallback(
+    (result: PlacementResult) => {
+      const p: LearnProfile = {
+        nickname: learnerName,
+        ageBand: result.ageBand,
+        career: result.career,
+        level: result.level,
+        guardianConfirmed: result.ageBand === "kids",
+        locale: result.locale,
+        onboardingComplete: true,
+        placementCompleted: true,
+        placementScore: result.score,
+        placementAnswers: result.answers,
+        outcomeBestScore: profile?.outcomeBestScore,
+        outcomeCompletedAt: profile?.outcomeCompletedAt,
+        tutorialSeen: true,
+        createdAt: profile?.createdAt || new Date().toISOString(),
+      };
+      saveProfile(p);
+      setProfile(p);
+
+      // If locale changed during placement, route to matching locale URL
+      if (result.locale !== locale) {
+        router.push(`/${result.locale}/learn/studio?hub=1`);
+        return;
+      }
+
+      proceedWithCaptchaCheck("home");
+    },
+    [learnerName, locale, proceedWithCaptchaCheck, profile?.createdAt, profile?.outcomeBestScore, profile?.outcomeCompletedAt, router]
+  );
+
+  const handleOutcomeComplete = useCallback(
+    (score: number) => {
+      if (!profile?.placementCompleted) {
+        setPhase("home");
+        return;
+      }
+      const previous = profile.outcomeBestScore;
+      const best = previous === undefined ? score : Math.max(previous, score);
+      const next: LearnProfile = {
+        ...profile,
+        outcomeBestScore: best,
+        outcomeCompletedAt: new Date().toISOString(),
+      };
+      saveProfile(next);
+      setProfile(next);
+      setPhase("home");
+    },
+    [profile]
+  );
 
   useEffect(() => {
     if (phase !== "splash") return;
-    if (reduceMotion) { setIntroStage(4); return; }
+    if (reduceMotion) {
+      setIntroStage(4);
+      return;
+    }
     const logoVisible = window.setTimeout(() => setIntroStage(1), 350);
     const moveLogo = window.setTimeout(() => setIntroStage(2), 1050);
     const headline = window.setTimeout(() => setIntroStage(3), 1650);
     const cta = window.setTimeout(() => setIntroStage(4), 2250);
-    return () => { window.clearTimeout(logoVisible); window.clearTimeout(moveLogo); window.clearTimeout(headline); window.clearTimeout(cta); };
+    return () => {
+      window.clearTimeout(logoVisible);
+      window.clearTimeout(moveLogo);
+      window.clearTimeout(headline);
+      window.clearTimeout(cta);
+    };
   }, [phase, reduceMotion]);
 
   useEffect(() => {
@@ -132,39 +161,27 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
       }
       if (cancelled) return;
 
-      if (searchParams.get("onboarding") === "1") {
-        clearOnboardingDraft();
-        setStep("language");
-        setAgeBand(null);
-        setCareer(null);
-        setLevel(null);
-        setGuardianConfirmed(false);
-        setPhase("onboarding");
-        setIntroStage(4);
-        setProfileLoaded(true);
-        return;
-      }
       const existing = loadProfile();
-      if (existing?.onboardingComplete) {
-        setProfile(existing);
-        if (searchParams.get("hub") === "1") setPhase("home");
-      } else {
-        const draft = loadOnboardingDraft();
-        if (draft?.step === "nickname") {
-          if (draft.ageBand && draft.career && draft.level) {
-            setAgeBand(draft.ageBand as AgeBand);
-            setCareer(draft.career as CareerId);
-            setLevel(draft.level as LearnLevel);
-            if (draft.guardianConfirmed) setGuardianConfirmed(true);
-            setPhase("cooking");
-          }
-        } else if (draft?.step && isOnboardingStep(draft.step)) {
-          setStep(draft.step);
-          if (draft.ageBand) setAgeBand(draft.ageBand as AgeBand);
-          if (draft.career) setCareer(draft.career as CareerId);
-          if (draft.level) setLevel(draft.level as LearnLevel);
-          if (draft.guardianConfirmed) setGuardianConfirmed(true);
+      if (existing) setProfile(existing);
+      // Signup and lesson redirects land on the dashboard. The pre-check starts from there.
+      // A completed placement is never cleared by ?onboarding=1.
+      if (searchParams.get("hub") === "1" && searchParams.get("onboarding") !== "1") {
+        const hasPassedTurnstile =
+          typeof window !== "undefined" &&
+          sessionStorage.getItem("sm_turnstile_passed") === "true";
+        if (hasPassedTurnstile) {
+          setPhase("home");
+        } else {
+          setPendingDestination("home");
+          setShowTurnstile(true);
         }
+      } else if (searchParams.get("onboarding") === "1" && !existing?.placementCompleted) {
+        try {
+          localStorage.removeItem(PLACEMENT_DRAFT_KEY);
+        } catch {
+          // ignore
+        }
+        setPhase("home");
       }
       setProfileLoaded(true);
     }
@@ -175,27 +192,6 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
     };
   }, [searchParams]);
 
-  const labels = stepLabels(locale);
-
-  const advanceAfterCooking = useCallback(() => {
-    if (!ageBand || !career || !level) return;
-    const p: LearnProfile = {
-      nickname: learnerName,
-      ageBand,
-      career,
-      level,
-      guardianConfirmed: needsGuardian(ageBand) ? guardianConfirmed : true,
-      locale,
-      onboardingComplete: true,
-      tutorialSeen: true,
-      createdAt: new Date().toISOString(),
-    };
-    saveProfile(p);
-    clearOnboardingDraft();
-    setProfile(p);
-    setPhase("home");
-  }, [ageBand, career, guardianConfirmed, learnerName, level, locale]);
-
   useEffect(() => {
     if (authLoading || !user) return;
     if (!profile?.onboardingComplete) return;
@@ -205,94 +201,33 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
     setProfile(next);
   }, [authLoading, learnerName, profile, user]);
 
-  useEffect(() => {
-    if (phase !== "cooking") return;
-    const t = setTimeout(advanceAfterCooking, 2800);
-    return () => clearTimeout(t);
-  }, [phase, advanceAfterCooking]);
-
-  const onSelect = (id: string) => {
-    if (step === "language") {
-      // Persist progress so the resumed onboarding on the new locale continues here.
-      saveOnboardingDraft({ step: "age" });
-      router.push(`/${id}/learn/studio`);
-      setStep("age");
-      return;
-    }
-    if (step === "age") {
-      setAgeBand(id as AgeBand);
-      saveOnboardingDraft({ step: "career", ageBand: id });
-      setStep("career");
-      return;
-    }
-    if (step === "career") {
-      setCareer(id as CareerId);
-      saveOnboardingDraft({ step: "level", ageBand: ageBand ?? undefined, career: id });
-      setStep("level");
-      return;
-    }
-    if (step === "level") {
-      setLevel(id as LearnLevel);
-      if (needsGuardian(ageBand)) {
-        saveOnboardingDraft({
-          step: "guardian",
-          ageBand: ageBand ?? undefined,
-          career: career ?? undefined,
-          level: id,
-        });
-        setStep("guardian");
-        return;
-      }
-      saveOnboardingDraft({
-        step: "level",
-        ageBand: ageBand ?? undefined,
-        career: career ?? undefined,
-        level: id,
-      });
-      setPhase("cooking");
-    }
-  };
-
-  const goBack = () => {
-    const target = PREVIOUS_STEP[step];
-    if (target) {
-      setStep(target);
-      saveOnboardingDraft({
-        step: target,
-        ageBand: ageBand ?? undefined,
-        career: career ?? undefined,
-        level: level ?? undefined,
-        guardianConfirmed: guardianConfirmed || undefined,
-      });
-    } else setPhase("splash");
-  };
-
-  const cooking = cookingCopy(locale, learnerName);
-
-  const question = useMemo(() => {
-    if (step === "language") return labels.language;
-    if (step === "age") return labels.age;
-    if (step === "career") return careerQuestion(locale, ageBand);
-    if (step === "level") return labels.level;
-    return labels.guardian;
-  }, [ageBand, labels, locale, step]);
-
-  const options = useMemo(() => {
-    if (step === "language")
-      return [
-        { id: "en", label: "English" },
-        { id: "sw", label: "Kiswahili" },
-      ];
-    if (step === "age") return ageOptions(locale);
-    if (step === "career") return careerOptions(locale, ageBand);
-    if (step === "level") return levelOptions(locale);
-    return [];
-  }, [locale, step]);
-
-  if (phase === "home" && profile) {
+  if (phase === "home") {
     return (
       <div className="learn-studio relative min-h-screen overflow-x-hidden">
-        <LearnHub profile={profile} locale={locale} />
+        <LearnHub
+          profile={profile}
+          locale={locale}
+          onStartPrecheck={() => proceedWithCaptchaCheck("placement")}
+          onStartOutcome={() => setPhase("outcome")}
+        />
+        <TurnstileGate
+          isOpen={showTurnstile}
+          locale={locale}
+          onVerified={handleTurnstileVerified}
+          onCancel={() => setShowTurnstile(false)}
+        />
+      </div>
+    );
+  }
+
+  if (phase === "outcome" && profile?.placementCompleted) {
+    return (
+      <div className="learn-studio relative min-h-screen overflow-x-hidden">
+        <OutcomeCheck
+          locale={locale}
+          onComplete={handleOutcomeComplete}
+          onCancel={() => setPhase("home")}
+        />
       </div>
     );
   }
@@ -314,18 +249,29 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
         aria-hidden
       />
 
-      {phase !== "splash" && <header className="relative z-10 flex items-center justify-between px-6 py-5 max-w-6xl mx-auto">
-        <Image src="/logo-full.png" alt="savannamind" width={160} height={44} priority />
-        <div className="flex items-center gap-2">
-          {phase !== "cooking" && (
+      {phase !== "splash" && (
+        <header className="relative z-10 flex items-center justify-between px-6 py-5 max-w-6xl mx-auto">
+          <Image
+            src="/logo-full.png"
+            alt="savannamind"
+            width={160}
+            height={44}
+            priority
+          />
+          <div className="flex items-center gap-2">
             <OnboardingLocaleSwitch locale={locale} />
-          )}
-          <SignOutButton locale={locale} />
-        </div>
-      </header>}
+            <SignOutButton locale={locale} />
+          </div>
+        </header>
+      )}
 
       {phase === "splash" && (
-        <main className={`learn-studio-intro${introExiting ? " is-exiting" : ""}`} aria-label={locale === "sw" ? "Utangulizi wa Learn Studio" : "Learn Studio intro"}>
+        <main
+          className={`learn-studio-intro${introExiting ? " is-exiting" : ""}`}
+          aria-label={
+            locale === "sw" ? "Utangulizi wa Learn Studio" : "Learn Studio intro"
+          }
+        >
           <motion.div
             className="learn-studio-intro-logo"
             initial={reduceMotion ? false : { opacity: 0, y: 0 }}
@@ -357,7 +303,9 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
             }}
             aria-hidden={introStage <= 2}
           >
-            {locale === "sw" ? "Jifunze AI kutatua matatizo halisi" : "Learn AI to solve real problems"}
+            {locale === "sw"
+              ? "Jifunze AI kutatua matatizo halisi"
+              : "Learn AI to solve real problems"}
           </motion.h1>
 
           <motion.div
@@ -376,15 +324,10 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
             }}
             aria-hidden={introStage <= 3}
           >
-            {profile?.onboardingComplete ? (
-              <>
-                <GetStartedButton onClick={startNewOnboarding} disabled={!profileLoaded}>
-                  {locale === "sw" ? "Anza Upya" : "Get Started"}
-                </GetStartedButton>
-                <ContinueButton onClick={continueTraining}>
-                  {locale === "sw" ? "Endelea na Mafunzo" : "Continue"}
-                </ContinueButton>
-              </>
+            {isReturningUser ? (
+              <ContinueButton onClick={continueTraining} disabled={!profileLoaded}>
+                {locale === "sw" ? "Endelea na Moduli Zako" : "Continue to Modules"}
+              </ContinueButton>
             ) : (
               <GetStartedButton onClick={startStudio} disabled={!profileLoaded}>
                 {locale === "sw" ? "Anza" : "Get Started"}
@@ -394,234 +337,22 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
         </main>
       )}
 
-      {phase === "onboarding" && (
-        <main
-          key={step}
-          className={`relative z-10 w-full ${step === "career" ? "max-w-3xl" : "max-w-xl"} transition-all duration-300 mx-auto px-4 py-8 sm:py-12 learn-onboarding-widget${introExiting ? " is-entering" : ""}`}
-        >
-          <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-learn-teal/15 p-6 sm:p-10 shadow-learn-lg">
-            <Questionnaire
-              onSubmit={(e) => {
-                e.preventDefault();
-              }}
-            >
-              <QuestionnaireProgress
-                className="mb-4 self-start"
-                current={
-                  step === "language"
-                    ? 1
-                    : step === "age"
-                    ? 2
-                    : step === "career"
-                    ? 3
-                    : step === "level"
-                    ? 4
-                    : 5
-                }
-                total={needsGuardian(ageBand) ? 5 : 4}
-                render={(props, state) => (
-                  <div {...props} className="flex flex-col gap-2 w-full mb-4">
-                    <div className="flex items-center gap-1.5 w-full">
-                      {Array.from({ length: state.total }).map((_, i) => (
-                        <div
-                          key={i}
-                          className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-                            i < state.current ? "bg-learn-teal" : "bg-learn-teal/15"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-learn-muted">
-                      {locale === "sw"
-                        ? `Hatua ${state.current} ya ${state.total}`
-                        : `Checkpoint ${state.current} of ${state.total}`}
-                    </span>
-                  </div>
-                )}
-              />
-
-              {step === "language" && (
-                <QuestionnaireItem name="language">
-                  <QuestionnaireTitle>{labels.language}</QuestionnaireTitle>
-                  <QuestionnaireChoices>
-                    <QuestionnaireChoice
-                      value="en"
-                      selected={locale === "en"}
-                      onClick={() => onSelect("en")}
-                    >
-                      English
-                    </QuestionnaireChoice>
-                    <QuestionnaireChoice
-                      value="sw"
-                      selected={locale === "sw"}
-                      onClick={() => onSelect("sw")}
-                    >
-                      Kiswahili
-                    </QuestionnaireChoice>
-                  </QuestionnaireChoices>
-                  <QuestionnaireActions>
-                    <QuestionnairePrevious
-                      label={locale === "sw" ? "Rudi" : "Back"}
-                      onClick={goBack}
-                    />
-                  </QuestionnaireActions>
-                </QuestionnaireItem>
-              )}
-
-              {step === "age" && (
-                <QuestionnaireItem name="age">
-                  <QuestionnaireTitle>{labels.age}</QuestionnaireTitle>
-                  <QuestionnaireChoices>
-                    {ageOptions(locale).map((o) => (
-                      <QuestionnaireChoice
-                        key={o.id}
-                        value={o.id}
-                        selected={ageBand === o.id}
-                        onClick={() => onSelect(o.id)}
-                      >
-                        {o.label}
-                      </QuestionnaireChoice>
-                    ))}
-                  </QuestionnaireChoices>
-                  <QuestionnaireActions>
-                    <QuestionnairePrevious
-                      label={locale === "sw" ? "Rudi" : "Back"}
-                      onClick={goBack}
-                    />
-                  </QuestionnaireActions>
-                </QuestionnaireItem>
-              )}
-
-              {step === "career" && (
-                <QuestionnaireItem name="career">
-                  <QuestionnaireTitle>
-                    {careerQuestion(locale, ageBand)}
-                  </QuestionnaireTitle>
-                  <div className="w-full my-3">
-                    <label className="block text-sm font-medium text-learn-muted mb-2">
-                      {locale === "sw"
-                        ? "Chagua sekta yako"
-                        : "Select your sector"}
-                    </label>
-                    <SectorCardDropdown
-                      selectedId={career}
-                      onSelect={(id) => {
-                        setCareer(id);
-                        saveOnboardingDraft({
-                          step: "level",
-                          ageBand: ageBand ?? undefined,
-                          career: id,
-                        });
-                      }}
-                      locale={locale}
-                    />
-                  </div>
-                  <QuestionnaireActions>
-                    <QuestionnairePrevious
-                      label={locale === "sw" ? "Rudi" : "Back"}
-                      onClick={goBack}
-                    />
-                    <QuestionnaireNext
-                      label={locale === "sw" ? "Endelea" : "Next"}
-                      disabled={!career}
-                      onClick={() => {
-                        if (!career) return;
-                        saveOnboardingDraft({
-                          step: "level",
-                          ageBand: ageBand ?? undefined,
-                          career,
-                        });
-                        setStep("level");
-                      }}
-                    />
-                  </QuestionnaireActions>
-                </QuestionnaireItem>
-              )}
-
-              {step === "level" && (
-                <QuestionnaireItem name="level">
-                  <QuestionnaireTitle>{labels.level}</QuestionnaireTitle>
-                  <QuestionnaireChoices>
-                    {levelOptions(locale).map((o) => (
-                      <QuestionnaireChoice
-                        key={o.id}
-                        value={o.id}
-                        selected={level === o.id}
-                        onClick={() => onSelect(o.id)}
-                      >
-                        {o.label}
-                      </QuestionnaireChoice>
-                    ))}
-                  </QuestionnaireChoices>
-                  <QuestionnaireActions>
-                    <QuestionnairePrevious
-                      label={locale === "sw" ? "Rudi" : "Back"}
-                      onClick={goBack}
-                    />
-                  </QuestionnaireActions>
-                </QuestionnaireItem>
-              )}
-
-              {step === "guardian" && (
-                <QuestionnaireItem name="guardian">
-                  <QuestionnaireTitle>{labels.guardian}</QuestionnaireTitle>
-                  <p className="text-learn-muted text-sm sm:text-base leading-relaxed my-2">
-                    {locale === "sw"
-                      ? "Mimi ni mlezi na naruhusu mtoto wangu kutumia jukwaa hili kwa kujifunza. Hatutaweka jina kamili wala shule bila idhini."
-                      : "I am a guardian and I allow this learner to use the platform for education. We will not store full legal names or school names without consent."}
-                  </p>
-                  <label className="flex items-start gap-3 p-4 rounded-xl border border-learn-teal/20 bg-white cursor-pointer my-3">
-                    <input
-                      type="checkbox"
-                      checked={guardianConfirmed}
-                      onChange={(e) => setGuardianConfirmed(e.target.checked)}
-                      className="mt-1 h-5 w-5 rounded accent-learn-teal cursor-pointer"
-                    />
-                    <span className="text-sm font-medium text-learn-ink">
-                      {locale === "sw" ? "Nakubali" : "I agree"}
-                    </span>
-                  </label>
-                  <QuestionnaireActions>
-                    <QuestionnairePrevious
-                      label={locale === "sw" ? "Rudi" : "Back"}
-                      onClick={goBack}
-                    />
-                    <QuestionnaireNext
-                      label={locale === "sw" ? "Endelea" : "Next"}
-                      disabled={!guardianConfirmed}
-                      onClick={() => {
-                        saveOnboardingDraft({
-                          step: "guardian",
-                          ageBand: ageBand ?? undefined,
-                          career: career ?? undefined,
-                          level: level ?? undefined,
-                          guardianConfirmed: true,
-                        });
-                        setPhase("cooking");
-                      }}
-                    />
-                  </QuestionnaireActions>
-                </QuestionnaireItem>
-              )}
-            </Questionnaire>
-          </div>
+      {phase === "placement" && (
+        <main className="relative z-10 w-full max-w-3xl mx-auto px-4 py-6">
+          <PreAssessmentQuiz
+            initialLocale={locale}
+            nickname={learnerName}
+            onComplete={handlePlacementComplete}
+          />
         </main>
       )}
 
-      {phase === "cooking" && (
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
-          <Image
-            src="/learn/kibo-2d.png"
-            alt=""
-            width={110}
-            height={110}
-            className="mb-4 rounded-full border-2 border-learn-gold/60 shadow-learn animate-pulse"
-            priority
-          />
-          <h2 className="text-2xl font-bold text-learn-night">{cooking.title}</h2>
-          <p className="mt-3 text-learn-muted max-w-md">{cooking.body}</p>
-        </div>
-      )}
+      <TurnstileGate
+        isOpen={showTurnstile}
+        locale={locale}
+        onVerified={handleTurnstileVerified}
+        onCancel={() => setShowTurnstile(false)}
+      />
     </div>
   );
 }
@@ -640,4 +371,3 @@ function SplashLogo() {
     </div>
   );
 }
-

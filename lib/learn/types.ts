@@ -14,6 +14,13 @@ export type LearnProfile = {
   guardianConfirmed: boolean;
   locale: "en" | "sw";
   onboardingComplete: boolean;
+  placementCompleted?: boolean;
+  /** Baseline: 12 scored pre-check items. Language, age, and career are not included. */
+  placementScore?: number;
+  placementAnswers?: Record<string, string>;
+  /** Best end-of-course check on the same 12 skills. A module pass is not this score. */
+  outcomeBestScore?: number;
+  outcomeCompletedAt?: string;
   /** @deprecated Tutorial removed from product; kept for storage compat */
   tutorialSeen: boolean;
   createdAt: string;

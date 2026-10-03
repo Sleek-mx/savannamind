@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import type { ResolvedModule } from "@/lib/learn/curriculum/types";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/components/auth/sign-out-button";
-import { previewModules, type ModuleCard } from "@/lib/learn/modules";
+import { modulesForLevel, type ModuleCard } from "@/lib/learn/modules";
 import { isModuleUnlocked, loadProgress, type LearnProgress } from "@/lib/learn/progress";
 
 export function LearnLessonLayout({
@@ -19,7 +19,7 @@ export function LearnLessonLayout({
   onUnitSelect,
   kiboColumn,
   failedUnitIds,
-  moduleOrder = ["m0", "agr", "hlt", "edu", "biz", "cap"],
+  moduleOrder = ["s1", "s2", "s3", "s4", "s5"],
   children,
 }: {
   module: ResolvedModule;
@@ -42,13 +42,14 @@ export function LearnLessonLayout({
   }, [module.id, unitIndex]);
 
   const orderedModules = useMemo(() => {
+    const cards = modulesForLevel(module.level);
     const list: ModuleCard[] = [];
     for (const id of moduleOrder) {
-      const found = previewModules.find((m) => m.id === id);
+      const found = cards.find((m) => m.id === id);
       if (found) list.push(found);
     }
-    return list.length > 0 ? list : previewModules;
-  }, [moduleOrder]);
+    return list.length > 0 ? list : cards;
+  }, [module.level, moduleOrder]);
 
   const navListRef = useRef<HTMLOListElement>(null);
 
@@ -64,7 +65,7 @@ export function LearnLessonLayout({
     <div className="learn-lesson-layout">
       <header className="learn-lesson-topbar">
         <div className="learn-lesson-topbar-brand">
-          <Link href={`/${locale}/learn/studio`} className="inline-flex items-center">
+          <Link href={`/${locale}/learn/studio?hub=1`} className="inline-flex items-center">
             <Image
               src="/logo-full.png"
               alt="savannamind"

@@ -1,86 +1,67 @@
+import type { LearnLevel } from "@/lib/learn/types";
 import type { CurriculumUnit, ModuleCurriculum } from "@/lib/learn/curriculum/types";
-import { agrAdvancedUnits } from "./agr-advanced";
-import { agrBeginnerUnits } from "./agr-beginner";
-import { agrIntermediateUnits } from "./agr-intermediate";
-import { bizAdvancedUnits } from "./biz-advanced";
-import { bizBeginnerUnits } from "./biz-beginner";
-import { bizIntermediateUnits } from "./biz-intermediate";
-import { capAdvancedUnits } from "./cap-advanced";
-import { capBeginnerUnits } from "./cap-beginner";
-import { capIntermediateUnits } from "./cap-intermediate";
-import { eduAdvancedUnits } from "./edu-advanced";
-import { eduBeginnerUnits } from "./edu-beginner";
-import { eduIntermediateUnits } from "./edu-intermediate";
-import { hltAdvancedUnits } from "./hlt-advanced";
-import { hltBeginnerUnits } from "./hlt-beginner";
-import { hltIntermediateUnits } from "./hlt-intermediate";
-import { m0AdvancedUnits } from "./m0-advanced";
-import { m0BeginnerUnits } from "./m0-beginner";
-import { m0IntermediateUnits } from "./m0-intermediate";
+import { advancedModules } from "@/lib/learn/curriculum/short/advanced";
+import { advancedRest } from "@/lib/learn/curriculum/short/advanced-rest";
+import { beginnerModules } from "@/lib/learn/curriculum/short/beginner";
+import { intermediateModules } from "@/lib/learn/curriculum/short/intermediate";
+import { intermediateRest } from "@/lib/learn/curriculum/short/intermediate-rest";
+import { intermediateTail } from "@/lib/learn/curriculum/short/intermediate-tail";
+import {
+  MODULE_PASS_COUNT,
+  SHORT_SLOTS,
+  buildTrackUnits,
+  gateItems,
+  type ModuleGateItem,
+  type ModuleSpec,
+  type ShortSlot,
+} from "@/lib/learn/curriculum/short/build";
 
-function track(level: "beginner" | "intermediate" | "advanced", units: CurriculumUnit[]) {
-  return { level, units };
+const byLevel: Record<LearnLevel, ModuleSpec[]> = {
+  beginner: beginnerModules,
+  intermediate: [...intermediateModules, ...intermediateRest, ...intermediateTail],
+  advanced: [...advancedModules, ...advancedRest],
+};
+
+function track(level: LearnLevel, slot: ShortSlot, spec: ModuleSpec) {
+  return { level, units: buildTrackUnits(slot, level, spec) };
 }
 
-export const moduleCurricula: ModuleCurriculum[] = [
-  {
-    id: "m0",
-    sdg: 17,
-    xpReward: 80,
-    tracks: {
-      beginner: track("beginner", m0BeginnerUnits),
-      intermediate: track("intermediate", m0IntermediateUnits),
-      advanced: track("advanced", m0AdvancedUnits),
-    },
+export const moduleCurricula: ModuleCurriculum[] = SHORT_SLOTS.map((slot, index) => ({
+  id: slot,
+  sdg: 4,
+  xpReward: 80,
+  tracks: {
+    beginner: track("beginner", slot, byLevel.beginner[index]),
+    intermediate: track("intermediate", slot, byLevel.intermediate[index]),
+    advanced: track("advanced", slot, byLevel.advanced[index]),
   },
-  {
-    id: "agr",
-    sdg: 2,
-    xpReward: 90,
-    tracks: {
-      beginner: track("beginner", agrBeginnerUnits),
-      intermediate: track("intermediate", agrIntermediateUnits),
-      advanced: track("advanced", agrAdvancedUnits),
-    },
-  },
-  {
-    id: "hlt",
-    sdg: 3,
-    xpReward: 90,
-    tracks: {
-      beginner: track("beginner", hltBeginnerUnits),
-      intermediate: track("intermediate", hltIntermediateUnits),
-      advanced: track("advanced", hltAdvancedUnits),
-    },
-  },
-  {
-    id: "edu",
-    sdg: 4,
-    xpReward: 90,
-    tracks: {
-      beginner: track("beginner", eduBeginnerUnits),
-      intermediate: track("intermediate", eduIntermediateUnits),
-      advanced: track("advanced", eduAdvancedUnits),
-    },
-  },
-  {
-    id: "biz",
-    sdg: 8,
-    xpReward: 90,
-    tracks: {
-      beginner: track("beginner", bizBeginnerUnits),
-      intermediate: track("intermediate", bizIntermediateUnits),
-      advanced: track("advanced", bizAdvancedUnits),
-    },
-  },
-  {
-    id: "cap",
-    sdg: 17,
-    xpReward: 120,
-    tracks: {
-      beginner: track("beginner", capBeginnerUnits),
-      intermediate: track("intermediate", capIntermediateUnits),
-      advanced: track("advanced", capAdvancedUnits),
-    },
-  },
-];
+}));
+
+export function shortModuleSpec(moduleId: string, level: LearnLevel): ModuleSpec | undefined {
+  const index = SHORT_SLOTS.indexOf(moduleId as ShortSlot);
+  if (index < 0) return undefined;
+  return byLevel[level]?.[index];
+}
+
+export function getModuleGate(
+  moduleId: string,
+  level: LearnLevel
+): { passCount: number; items: ModuleGateItem[]; titleEn: string; titleSw: string } | undefined {
+  const spec = shortModuleSpec(moduleId, level);
+  if (!spec) return undefined;
+  return {
+    passCount: MODULE_PASS_COUNT,
+    items: gateItems(spec),
+    titleEn: spec.titleEn,
+    titleSw: spec.titleSw,
+  };
+}
+
+export function unitIndexForRestudy(unit: ModuleGateItem["restudy"]["unit"]): number {
+  if (unit === "basics") return 0;
+  if (unit === "specific") return 1;
+  if (unit === "application") return 2;
+  return 3;
+}
+
+export type { CurriculumUnit };

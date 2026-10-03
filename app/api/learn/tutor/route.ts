@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { previewModules } from "@/lib/learn/modules";
+import { moduleCard } from "@/lib/learn/modules";
+import type { LearnLevel } from "@/lib/learn/types";
 
 // Verified working model id (lowercase) — "DeepSeek-V4.1-Flash" returns 404 model_not_found.
 const BAI_BASE = process.env.BAI_BASE_URL ?? "https://api.b.ai/v1";
@@ -97,9 +98,11 @@ export async function POST(req: Request) {
       : "";
 
   // Lesson context: resolve the human-readable module title.
-  const moduleMeta = body.moduleId
-    ? previewModules.find((m) => m.id === body.moduleId)
-    : undefined;
+  const moduleLevel: LearnLevel =
+    body.moduleLevel === "intermediate" || body.moduleLevel === "advanced" || body.moduleLevel === "beginner"
+      ? body.moduleLevel
+      : "beginner";
+  const moduleMeta = body.moduleId ? moduleCard(body.moduleId, moduleLevel) : undefined;
   const moduleTitle = moduleMeta
     ? locale === "sw"
       ? moduleMeta.titleSw

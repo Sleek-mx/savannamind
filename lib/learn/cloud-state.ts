@@ -36,6 +36,8 @@ export type ProfileMeta = {
   placementCompleted?: boolean;
   placementScore?: number;
   placementAnswers?: Record<string, string>;
+  outcomeBestScore?: number;
+  outcomeCompletedAt?: string;
 };
 
 export function encodeProfileMeta(profile: LearnProfile): string {
@@ -47,6 +49,8 @@ export function encodeProfileMeta(profile: LearnProfile): string {
     placementCompleted: profile.placementCompleted,
     placementScore: profile.placementScore,
     placementAnswers: profile.placementAnswers,
+    outcomeBestScore: profile.outcomeBestScore,
+    outcomeCompletedAt: profile.outcomeCompletedAt,
   };
   return JSON.stringify(meta);
 }

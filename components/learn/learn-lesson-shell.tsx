@@ -30,7 +30,7 @@ export function LearnLessonShell({
   }, [moduleId, profile]);
 
   const order = useMemo(() => {
-    if (!profile) return ["m0", "agr", "hlt", "edu", "biz", "cap"];
+    if (!profile) return ["s1", "s2", "s3", "s4", "s5"];
     return modulesForProfile(profile.career, profile.level).map((m) => m.id);
   }, [profile]);
 
@@ -42,13 +42,13 @@ export function LearnLessonShell({
 
   useEffect(() => {
     if (!profileLoaded) return;
-    if (!profile?.onboardingComplete) {
-      router.replace(`/${locale}/learn/studio`);
+    if (!profile?.onboardingComplete || !profile.placementCompleted) {
+      router.replace(`/${locale}/learn/studio?hub=1`);
       return;
     }
     const progress = loadProgress();
     if (!isModuleUnlocked(moduleId, order, progress)) {
-      router.replace(`/${locale}/learn/studio`);
+      router.replace(`/${locale}/learn/studio?hub=1`);
     }
   }, [locale, moduleId, order, profile, profileLoaded, router]);
 

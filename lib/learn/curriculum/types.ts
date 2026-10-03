@@ -16,6 +16,15 @@ export type LessonCard =
       youtubeId: string;
       captionEn?: string;
       captionSw?: string;
+      /** Timestamped checks. Locked until the YouTube player reports ended. */
+      checks?: {
+        timestamp: string;
+        questionEn: string;
+        questionSw: string;
+        optionsEn: string[];
+        optionsSw: string[];
+        correctIndex: number;
+      }[];
     }
   | {
       type: "quiz";

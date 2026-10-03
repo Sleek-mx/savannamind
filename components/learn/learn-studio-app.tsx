@@ -20,8 +20,9 @@ import {
   PLACEMENT_DRAFT_KEY,
 } from "@/components/learn/pre-assessment-quiz";
 import { TurnstileGate } from "@/components/auth/turnstile-gate";
+import { OutcomeCheck } from "@/components/learn/outcome-check";
 
-type Phase = "splash" | "placement" | "home";
+type Phase = "splash" | "home" | "placement" | "outcome";
 
 export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
   const router = useRouter();
@@ -31,7 +32,7 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
   const [profile, setProfile] = useState<LearnProfile | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [showTurnstile, setShowTurnstile] = useState(false);
-  const [pendingDestination, setPendingDestination] = useState<"home" | "placement" | null>(null);
+  const [pendingDestination, setPendingDestination] = useState<"home" | "placement" | "outcome" | null>(null);
   const [introStage, setIntroStage] = useState(0);
   const [introExiting, setIntroExiting] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -46,7 +47,7 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
   }, [profile]);
 
   const proceedWithCaptchaCheck = useCallback(
-    (destination: "home" | "placement") => {
+    (destination: "home" | "placement" | "outcome") => {
       const hasPassedTurnstile =
         typeof window !== "undefined" &&
         sessionStorage.getItem("sm_turnstile_passed") === "true";
@@ -64,28 +65,20 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
   const startStudio = useCallback(() => {
     if (!profileLoaded) return;
     setIntroExiting(true);
-    if (isReturningUser) {
-      proceedWithCaptchaCheck("home");
-    } else {
-      window.setTimeout(() => setPhase("placement"), reduceMotion ? 0 : 420);
-    }
-  }, [isReturningUser, proceedWithCaptchaCheck, profileLoaded, reduceMotion]);
+    proceedWithCaptchaCheck("home");
+  }, [proceedWithCaptchaCheck, profileLoaded]);
 
   const continueTraining = useCallback(() => {
     setIntroExiting(true);
-    if (isReturningUser) {
-      proceedWithCaptchaCheck("home");
-    } else {
-      window.setTimeout(() => setPhase("placement"), reduceMotion ? 0 : 420);
-    }
-  }, [isReturningUser, proceedWithCaptchaCheck, reduceMotion]);
+    proceedWithCaptchaCheck("home");
+  }, [proceedWithCaptchaCheck]);
 
   const handleTurnstileVerified = useCallback(() => {
     setShowTurnstile(false);
-    const dest = pendingDestination || (isReturningUser ? "home" : "placement");
+    const dest = pendingDestination || "home";
     setPendingDestination(null);
     setPhase(dest);
-  }, [isReturningUser, pendingDestination]);
+  }, [pendingDestination]);
 
   const handlePlacementComplete = useCallback(
     (result: PlacementResult) => {
@@ -100,6 +93,8 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
         placementCompleted: true,
         placementScore: result.score,
         placementAnswers: result.answers,
+        outcomeBestScore: profile?.outcomeBestScore,
+        outcomeCompletedAt: profile?.outcomeCompletedAt,
         tutorialSeen: true,
         createdAt: profile?.createdAt || new Date().toISOString(),
       };
@@ -114,7 +109,27 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
 
       proceedWithCaptchaCheck("home");
     },
-    [learnerName, locale, proceedWithCaptchaCheck, profile?.createdAt, router]
+    [learnerName, locale, proceedWithCaptchaCheck, profile?.createdAt, profile?.outcomeBestScore, profile?.outcomeCompletedAt, router]
+  );
+
+  const handleOutcomeComplete = useCallback(
+    (score: number) => {
+      if (!profile?.placementCompleted) {
+        setPhase("home");
+        return;
+      }
+      const previous = profile.outcomeBestScore;
+      const best = previous === undefined ? score : Math.max(previous, score);
+      const next: LearnProfile = {
+        ...profile,
+        outcomeBestScore: best,
+        outcomeCompletedAt: new Date().toISOString(),
+      };
+      saveProfile(next);
+      setProfile(next);
+      setPhase("home");
+    },
+    [profile]
   );
 
   useEffect(() => {
@@ -147,27 +162,26 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
       if (cancelled) return;
 
       const existing = loadProfile();
-      if (existing?.onboardingComplete && existing?.placementCompleted) {
-        setProfile(existing);
-        // Returning user! Auto-open home if requested via hub=1 or signed in
-        if (searchParams.get("hub") === "1") {
-          const hasPassedTurnstile =
-            typeof window !== "undefined" &&
-            sessionStorage.getItem("sm_turnstile_passed") === "true";
-          if (hasPassedTurnstile) {
-            setPhase("home");
-          }
+      if (existing) setProfile(existing);
+      // Signup and lesson redirects land on the dashboard. The pre-check starts from there.
+      // A completed placement is never cleared by ?onboarding=1.
+      if (searchParams.get("hub") === "1" && searchParams.get("onboarding") !== "1") {
+        const hasPassedTurnstile =
+          typeof window !== "undefined" &&
+          sessionStorage.getItem("sm_turnstile_passed") === "true";
+        if (hasPassedTurnstile) {
+          setPhase("home");
+        } else {
+          setPendingDestination("home");
+          setShowTurnstile(true);
         }
-      } else {
-        // If user already had a partial draft, check if they are restarting explicitly
-        if (searchParams.get("onboarding") === "1") {
-          try {
-            localStorage.removeItem(PLACEMENT_DRAFT_KEY);
-          } catch {
-            // ignore
-          }
-          setPhase("placement");
+      } else if (searchParams.get("onboarding") === "1" && !existing?.placementCompleted) {
+        try {
+          localStorage.removeItem(PLACEMENT_DRAFT_KEY);
+        } catch {
+          // ignore
         }
+        setPhase("home");
       }
       setProfileLoaded(true);
     }
@@ -187,10 +201,33 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
     setProfile(next);
   }, [authLoading, learnerName, profile, user]);
 
-  if (phase === "home" && profile) {
+  if (phase === "home") {
     return (
       <div className="learn-studio relative min-h-screen overflow-x-hidden">
-        <LearnHub profile={profile} locale={locale} />
+        <LearnHub
+          profile={profile}
+          locale={locale}
+          onStartPrecheck={() => proceedWithCaptchaCheck("placement")}
+          onStartOutcome={() => setPhase("outcome")}
+        />
+        <TurnstileGate
+          isOpen={showTurnstile}
+          locale={locale}
+          onVerified={handleTurnstileVerified}
+          onCancel={() => setShowTurnstile(false)}
+        />
+      </div>
+    );
+  }
+
+  if (phase === "outcome" && profile?.placementCompleted) {
+    return (
+      <div className="learn-studio relative min-h-screen overflow-x-hidden">
+        <OutcomeCheck
+          locale={locale}
+          onComplete={handleOutcomeComplete}
+          onCancel={() => setPhase("home")}
+        />
       </div>
     );
   }
@@ -293,9 +330,7 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
               </ContinueButton>
             ) : (
               <GetStartedButton onClick={startStudio} disabled={!profileLoaded}>
-                {locale === "sw"
-                  ? "Anza Tathmini (Maswali 15)"
-                  : "Start Pre-Assessment (15 Qs)"}
+                {locale === "sw" ? "Anza" : "Get Started"}
               </GetStartedButton>
             )}
           </motion.div>

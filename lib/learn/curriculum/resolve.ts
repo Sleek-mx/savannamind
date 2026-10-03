@@ -2,31 +2,14 @@ import type { AgeBand, LearnLevel } from "@/lib/learn/types";
 import { moduleCurricula } from "@/lib/learn/curriculum/modules";
 import type { CurriculumUnit, ResolvedModule } from "@/lib/learn/curriculum/types";
 
-function nextLevelForAdultExtension(level: LearnLevel): LearnLevel {
-  if (level === "beginner") return "intermediate";
-  if (level === "intermediate") return "advanced";
-  return "intermediate";
-}
-
 function unitsForBand(
   mod: (typeof moduleCurricula)[number],
   level: LearnLevel,
-  ageBand: AgeBand
+  _ageBand: AgeBand
 ): CurriculumUnit[] {
   const track = mod.tracks[level] ?? mod.tracks.beginner;
-
-  if (ageBand === "kids") {
-    return track.units.slice(0, Math.min(9, track.units.length));
-  }
-  if (ageBand === "youth") {
-    return track.units.slice(0, Math.min(12, track.units.length));
-  }
-
-  const primary = track.units.slice(0, Math.min(12, track.units.length));
-  const extensionLevel = nextLevelForAdultExtension(level);
-  const extensionTrack = mod.tracks[extensionLevel] ?? mod.tracks.intermediate;
-  const extension = extensionTrack.units.slice(0, 6);
-  return [...primary, ...extension];
+  // The approved short course is four units for every learner at the placed level.
+  return track.units;
 }
 
 export function getCurriculumModule(

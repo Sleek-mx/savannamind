@@ -147,7 +147,36 @@ export function mergeCloudWithLocal(
   if (remoteHasProfile && !localHasProfile) return remote;
   const remoteXp = remote.progress?.totalXp ?? 0;
   const localXp = local.progress?.totalXp ?? 0;
-  return remoteXp >= localXp ? remote : local;
+  const chosen = remoteXp >= localXp ? remote : local;
+  const other = chosen === remote ? local : remote;
+  return mergeScoreFields(chosen, other);
+}
+
+function mergeScoreFields(chosen: CloudLearnState, other: CloudLearnState): CloudLearnState {
+  const primary = chosen.profile;
+  const secondary = other.profile;
+  if (!primary || !secondary) return chosen;
+  const placementScore = primary.placementScore ?? secondary.placementScore;
+  const placementCompleted = Boolean(primary.placementCompleted || secondary.placementCompleted);
+  const bestPrimary = primary.outcomeBestScore;
+  const bestSecondary = secondary.outcomeBestScore;
+  let outcomeBestScore = bestPrimary;
+  let outcomeCompletedAt = primary.outcomeCompletedAt;
+  if (typeof bestSecondary === "number" && (typeof bestPrimary !== "number" || bestSecondary > bestPrimary)) {
+    outcomeBestScore = bestSecondary;
+    outcomeCompletedAt = secondary.outcomeCompletedAt ?? outcomeCompletedAt;
+  }
+  return {
+    ...chosen,
+    profile: {
+      ...primary,
+      placementCompleted: placementCompleted || primary.placementCompleted,
+      placementScore,
+      placementAnswers: primary.placementAnswers ?? secondary.placementAnswers,
+      outcomeBestScore,
+      outcomeCompletedAt,
+    },
+  };
 }
 
 export async function hydrateLearnStateFromCloud(): Promise<CloudLearnState> {

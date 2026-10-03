@@ -4,7 +4,7 @@ import { moduleCurricula } from "@/lib/learn/curriculum/modules";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { routing } from "@/i18n/routing";
 
-const moduleIds = ["m0", "agr", "hlt", "edu", "biz", "cap"];
+const moduleIds = ["s1", "s2", "s3", "s4", "s5"];
 
 export function generateStaticParams() {
   return routing.locales.flatMap((locale) =>

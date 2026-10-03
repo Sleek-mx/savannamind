@@ -10,6 +10,10 @@ import { spawnSync } from "node:child_process";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
 
+function lessonPlayerIncludesVoice(file) {
+  return readFileSync(file, "utf8").includes("VoicePlayer");
+}
+
 function ok(msg) {
   console.log(`OK  ${msg}`);
 }
@@ -65,17 +69,49 @@ const bandCheck = spawnSync(
     "tsx",
     "-e",
     `import { getCurriculumModule } from './lib/learn/curriculum/resolve.ts';
-const t=[['kids',9],['youth',12],['adult',18]];
-for (const [b,w] of t) {
-  const n=getCurriculumModule('m0',b,'beginner')!.units.length;
-  if (n!==w) { console.error('band',b,n); process.exit(1); }
+import { getModuleGate } from './lib/learn/curriculum/modules/index.ts';
+const levels=['beginner','intermediate','advanced'];
+const slots=['s1','s2','s3','s4','s5'];
+for (const level of levels) {
+  for (const slot of slots) {
+    const mod=getCurriculumModule(slot,'adult',level);
+    if (!mod || mod.units.length!==4) { console.error('units',slot,level,mod&&mod.units.length); process.exit(1); }
+    const videos=mod.units.map(u=>u.cards.filter(c=>c.type==='video').length);
+    if (videos.join(',')!=='0,1,1,0') { console.error('videos',slot,level,videos); process.exit(1); }
+    for (const unit of [mod.units[1], mod.units[2]]) {
+      const video=unit.cards.find(c=>c.type==='video');
+      if (!video || !video.checks || video.checks.length!==3) { console.error('checks',slot,level,unit.id); process.exit(1); }
+    }
+    const gate=getModuleGate(slot, level);
+    if (!gate || gate.passCount!==4 || gate.items.length!==5) { console.error('gate',slot,level); process.exit(1); }
+  }
 }
-console.log('bands ok');`,
+console.log('short course ok');`,
   ],
   { cwd: root, encoding: "utf8" }
 );
-if (bandCheck.status === 0) ok("Kids 9 / Youth 12 / Adult 18 units on m0 beginner");
-else fail(`band unit counts: ${bandCheck.stderr || bandCheck.stdout}`);
+if (bandCheck.status === 0) ok("Each level has 5 modules, 4 units, videos on specific notes and application, quiz pass 4 of 5");
+else fail(`short curriculum shape: ${bandCheck.stderr || bandCheck.stdout}`);
+
+const gateUi = readFileSync(join(learnComponents, "module-gate-quiz.tsx"), "utf8");
+if (
+  gateUi.includes("Whoops! you have not managed to pass this module. Please relook the notes, specifically:") &&
+  gateUi.includes("When ready, come back to this page.") &&
+  gateUi.includes("Go Back To Notes") &&
+  gateUi.includes("Am ready TO retry")
+) {
+  ok("module quiz fail screen uses the approved wording and buttons");
+} else fail("module quiz fail screen wording drifted");
+
+const youtubeGate = readFileSync(join(learnComponents, "gated-youtube.tsx"), "utf8");
+if (youtubeGate.includes("event.data === 0") && youtubeGate.includes("Rewatch from")) {
+  ok("video checks unlock on the YouTube ended state and send a miss back to its timestamp");
+} else fail("video question lock is not tied to the player ended state");
+
+const hub = readFileSync(join(learnComponents, "learn-hub.tsx"), "utf8");
+if (hub.includes("Gain is not in yet.") && hub.includes("onStartPrecheck") && hub.includes("outcomeBestScore")) {
+  ok("dashboard shows baseline gain only after a comparable check");
+} else fail("dashboard gain bar missing");
 
 const timed = JSON.parse(
   readFileSync(join(root, "lib/learn/timed-quizzes.json"), "utf8")
@@ -120,17 +156,27 @@ if (studioApp.includes("Learn AI to solve real problems") && studioApp.includes(
 if (!studioApp.includes("studio-intro.mp4") && !existsSync(join(root, "public/learn/studio-intro.mp4"))) {
   ok("obsolete intro MP4 removed");
 } else fail("obsolete intro MP4 still referenced or present");
-if (studioApp.includes('profile?.onboardingComplete ? "home" : "onboarding"') && studioApp.includes("<LearnHub profile={profile}")) {
-  ok("new learners onboard; returning learners open dashboard directly");
-} else fail("studio entry does not route to onboarding/dashboard correctly");
+if (
+  studioApp.includes("proceedWithCaptchaCheck(\"home\")") &&
+  studioApp.includes("onStartPrecheck") &&
+  studioApp.includes("<LearnHub") &&
+  studioApp.includes("PreAssessmentQuiz") &&
+  studioApp.includes("TurnstileGate")
+) {
+  ok("Get Started opens the locked dashboard; pre-check still uses the existing quiz after Turnstile");
+} else fail("studio entry does not route new learners to the locked dashboard");
 
 const flashcards = readFileSync(join(learnComponents, "flashcard-bullets.tsx"), "utf8");
 if (flashcards.includes("Next card") && flashcards.includes("onClick={onComplete}")) {
   ok("flashcard Next advances to the next card after bullets reveal");
 } else fail("flashcard Next does not advance the card");
-if (studioApp.includes("goBack") && studioApp.includes("language: null") && studioApp.includes("PREVIOUS_STEP")) {
-  ok("real onboarding remains language-first and supports backward navigation");
-} else fail("onboarding language-first/back navigation missing");
+const precheck = readFileSync(join(learnComponents, "pre-assessment-quiz.tsx"), "utf8");
+if (precheck.includes('setStage("calibrating")') && precheck.includes("level_revealed") && precheck.includes("<Loader")) {
+  ok("pre-check still uses the calibrating loader and level-reveal stage");
+} else fail("pre-check calibrating animation missing");
+if (lessonPlayerIncludesVoice(join(learnComponents, "lesson-player.tsx"))) {
+  ok("voice player still mounts in the lesson");
+} else fail("voice player missing from the lesson");
 
 if (
   !studioApp.includes("finishNickname") &&
@@ -171,7 +217,6 @@ console.log('names ok');`,
 if (nameCheck.status === 0) ok("deriveLearnerName prefers full_name, then name, then email prefix");
 else fail(`deriveLearnerName fallbacks: ${nameCheck.stderr || nameCheck.stdout}`);
 
-const hub = readFileSync(join(learnComponents, "learn-hub.tsx"), "utf8");
 if (hub.includes("deriveLearnerName") && hub.includes("displayName")) {
   ok("dashboard receives auto-derived learner name");
 } else fail("dashboard does not display derived learner name");

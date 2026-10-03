@@ -3,6 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { ShieldCheck, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  isTestTurnstileSiteKey,
+  missingProductionSiteKeyMessage,
+  testSiteKeyInProductionMessage,
+} from "@/lib/security/turnstile-public";
 
 declare global {
   interface Window {
@@ -29,6 +34,7 @@ interface TurnstileGateProps {
   onVerified: () => void;
   onCancel?: () => void;
   isOpen: boolean;
+  notice?: string | null;
 }
 
 const DEFAULT_TEST_SITE_KEY = "1x00000000000000000000AA";
@@ -38,6 +44,7 @@ export function TurnstileGate({
   onVerified,
   onCancel,
   isOpen,
+  notice = null,
 }: TurnstileGateProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
@@ -45,8 +52,16 @@ export function TurnstileGate({
   const [error, setError] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
 
-  const siteKey =
-    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || DEFAULT_TEST_SITE_KEY;
+  const configuredSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ?? "";
+  const productionBuild = process.env.NODE_ENV === "production";
+  const siteKeyProblem = productionBuild
+    ? !configuredSiteKey
+      ? missingProductionSiteKeyMessage()
+      : isTestTurnstileSiteKey(configuredSiteKey)
+        ? testSiteKeyInProductionMessage()
+        : null
+    : null;
+  const siteKey = siteKeyProblem ? "" : configuredSiteKey || DEFAULT_TEST_SITE_KEY;
 
   const handleVerifyToken = async (token: string) => {
     setVerifying(true);
@@ -60,14 +75,14 @@ export function TurnstileGate({
 
       const data = await res.json();
       if (res.ok && data.success) {
-        // Cache verification in sessionStorage for quick client-side session checks
-        sessionStorage.setItem("sm_turnstile_passed", "true");
         onVerified();
       } else {
         setError(
-          locale === "sw"
-            ? "Ukaguzi haukufanikiwa. Tafadhali jaribu tena."
-            : data.error || "Verification failed. Please try again."
+          typeof data.error === "string" && data.error
+            ? data.error
+            : locale === "sw"
+              ? "Ukaguzi haukufanikiwa. Tafadhali jaribu tena."
+              : "Verification failed. Please try again."
         );
         if (widgetIdRef.current && window.turnstile) {
           window.turnstile.reset(widgetIdRef.current);
@@ -86,6 +101,16 @@ export function TurnstileGate({
 
   useEffect(() => {
     if (!isOpen) return;
+    if (siteKeyProblem) {
+      setError(siteKeyProblem);
+      setLoading(false);
+      return;
+    }
+    if (notice) setError(notice);
+  }, [isOpen, notice, siteKeyProblem]);
+
+  useEffect(() => {
+    if (!isOpen || !siteKey) return;
 
     let isMounted = true;
 
@@ -179,7 +204,7 @@ export function TurnstileGate({
         {/* Turnstile Container */}
         <div className="min-h-[75px] flex items-center justify-center py-2">
           <div ref={containerRef} className="inline-block" />
-          {loading && !verifying && (
+          {loading && !verifying && Boolean(siteKey) && (
             <div className="text-xs text-slate-400 flex items-center gap-2">
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
               {locale === "sw" ? "Inapakia ukaguzi…" : "Loading check…"}

@@ -102,6 +102,17 @@ export type FetchedCloudState = {
 export async function fetchCloudState(): Promise<FetchedCloudState | null> {
   const res = await fetch("/api/learn/state", { credentials: "include" });
   if (res.status === 401) return null;
+  if (res.status === 403) {
+    let code = "";
+    try {
+      const body = (await res.json()) as { code?: unknown };
+      code = typeof body.code === "string" ? body.code : "";
+    } catch {
+      code = "";
+    }
+    if (code === "turnstile_required" || code === "turnstile_misconfigured") return null;
+    throw new Error("Failed to load learn state");
+  }
   if (!res.ok) {
     throw new Error("Failed to load learn state");
   }

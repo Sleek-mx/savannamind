@@ -18,8 +18,6 @@ export type LearnProgress = {
   certificateIssuedAt?: string;
 };
 
-const MODULE_IDS = ["s1", "s2", "s3", "s4", "s5"];
-
 export function loadProgress(): LearnProgress {
   if (typeof window === "undefined") {
     return { modules: {}, totalXp: 0 };
@@ -138,10 +136,6 @@ export function markModuleComplete(
     failedUnitIds: [],
   };
   p.totalXp = Object.values(p.modules).reduce((s, m) => s + m.xp, 0);
-  const allDone = MODULE_IDS.every((id) => p.modules[id]?.completed);
-  if (allDone && !p.certificateIssuedAt) {
-    p.certificateIssuedAt = new Date().toISOString();
-  }
   saveProgress(p);
   return p;
 }

@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { assessTurnstile } from "@/lib/security/turnstile";
 import {
   emptyCloudLearnState,
   type CloudLearnState,
@@ -14,7 +15,12 @@ import {
 
 const LEARN_USER_HEADER = "x-learn-user-id";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const gate = await assessTurnstile(request);
+  if (!gate.ok) {
+    return NextResponse.json({ error: gate.error, code: gate.code }, { status: gate.status });
+  }
+
   const supabase = createServerSupabaseClient();
   const {
     data: { user },
@@ -40,7 +46,12 @@ export async function GET() {
   }
 }
 
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
+  const gate = await assessTurnstile(request);
+  if (!gate.ok) {
+    return NextResponse.json({ error: gate.error, code: gate.code }, { status: gate.status });
+  }
+
   const supabase = createServerSupabaseClient();
   const {
     data: { user },

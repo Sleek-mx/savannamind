@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { learnerHasProgress, resolveContinueLessonHref } from "@/components/learn/learn-minimal-home";
 import { getCurriculumModule } from "@/lib/learn/curriculum/resolve";
 import { modulesForProfile, SHORT_MODULE_ORDER, type ModuleCard } from "@/lib/learn/modules";
+import { courseCertificateReady } from "@/lib/learn/certificate-eligibility";
 import { audienceBandForAge, careerById } from "@/lib/learn/careers";
 import {
   completionPercent,
@@ -68,6 +69,11 @@ export function LearnHub({
   const doneCount = order.filter((id) => progress.modules[id]?.completed).length;
   const courseDone = placed && order.every((id) => progress.modules[id]?.completed);
   const outcome = profile?.outcomeBestScore;
+  const certificateReady = courseCertificateReady({
+    modules: progress.modules,
+    outcomeBestScore: outcome,
+    outcomeCompletedAt: profile?.outcomeCompletedAt,
+  });
   const modulePct = completionPercent(order, progress);
   const courseXp = 5 * 80;
   const xpPct = Math.max(0, Math.min(100, Math.round((progress.totalXp / courseXp) * 100)));
@@ -296,9 +302,9 @@ export function LearnHub({
                         ? "Anza ukaguzi wa mwisho"
                         : "Start the end-of-course check"}
                   </Button>
-                  {progress.certificateIssuedAt && (
+                  {certificateReady && (
                     <Button className="mt-3" variant="outline" href={`/${locale}/learn/studio/certificate`}>
-                      {isSw ? "Angalia cheti" : "View certificate"}
+                      {isSw ? "Pakua cheti" : "Download certificate"}
                     </Button>
                   )}
                 </>

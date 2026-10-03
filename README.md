@@ -14,9 +14,13 @@ Canonical URL: **https://savannamind-ashy.vercel.app**. Use this host for links 
 
 Supabase project `epotmrwulmdpgqzuodwp` holds authentication, private `learner-data` Storage, `profiles`, and `learner_progress`. Supabase Auth Site URL must match the canonical production host. Google OAuth's authorized redirect URI is `https://epotmrwulmdpgqzuodwp.supabase.co/auth/v1/callback`.
 
+## Validation
+
+`npm test` and `npm run typecheck` do not need secrets. `npm run lint` is advisory and is not part of `next build`. Pull requests run these checks in GitHub Actions. Production deploys still come from pushes to `main` on Vercel and do not wait on that workflow.
+
 ## Release checks
 
-1. Run `npm run qa:learn` and `npm run build`.
+1. Run `npm test`, `npm run qa:learn`, and `npm run build`.
 2. After any local environment change, run `node scripts/sync-vercel-env.mjs`. It excludes `SUPABASE_ACCESS_TOKEN`. Never run `vercel env pull` over `.env.local`.
 3. Commit reviewed source and push `main`, then verify the Git-triggered deployment and public routes. Use `vercel --prod` only if Git deployment fails, and reconcile the Git connection afterward.
 

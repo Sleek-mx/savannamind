@@ -1,0 +1,26 @@
+# Pull requests only. Pushes to main deploy on Vercel and do not run this workflow.
+name: CI
+
+on:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Unit and smoke tests
+        run: npm test
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Format check (tooling files)
+        run: npm run format:check
+      - name: Lint (non-blocking)
+        continue-on-error: true
+        run: npm run lint

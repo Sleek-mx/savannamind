@@ -67,10 +67,10 @@ export function LearnHub({
   const activeModule = modules.find((m) => m.id === continueId) ?? modules[0];
   const doneCount = order.filter((id) => progress.modules[id]?.completed).length;
   const courseDone = placed && order.every((id) => progress.modules[id]?.completed);
-  const baseline = placed ? profile?.placementScore : undefined;
   const outcome = profile?.outcomeBestScore;
-  const gain =
-    typeof baseline === "number" && typeof outcome === "number" ? outcome - baseline : null;
+  const modulePct = completionPercent(order, progress);
+  const courseXp = 5 * 80;
+  const xpPct = Math.max(0, Math.min(100, Math.round((progress.totalXp / courseXp) * 100)));
 
   useEffect(() => {
     if (!returning) setBlurContinue(false);
@@ -126,11 +126,17 @@ export function LearnHub({
       transition={{ type: "tween", duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
     >
       <header className="learn-topbar learn-hub-topbar">
-        <span className="learn-hub-back text-sm font-medium">
-          {displayName} · {isSw ? "Dashibodi" : "Dashboard"}
-        </span>
-        <Image src="/logo-full.png" alt="savannamind" width={120} height={32} />
+        <Image
+          src="/logo-full.png"
+          alt="savannamind"
+          width={168}
+          height={94}
+          priority
+          className="learn-hub-logo"
+          style={{ height: "4.25rem", width: "auto" }}
+        />
         <div className="learn-hub-actions">
+          <span className="learn-hub-learner-name">{displayName}</span>
           <span className="learn-topbar-chip">{progress.totalXp} XP</span>
           <SignOutButton locale={locale} />
         </div>
@@ -182,38 +188,40 @@ export function LearnHub({
         </aside>
 
         <main className="learn-hub-main">
-          <GainBar
-            locale={locale}
-            baseline={typeof baseline === "number" ? baseline : null}
-            outcome={typeof outcome === "number" ? outcome : null}
-            gain={gain}
-          />
-
           {placed && profile && (
-            <section className="learn-hub-facts" aria-label={isSw ? "Hali ya mwanafunzi" : "Learner status"}>
-              <p>
-                <span>{isSw ? "Kiwango" : "Level"}</span>
-                <strong>{levelLabel(profile.level, locale)}</strong>
-              </p>
-              <p>
-                <span>{isSw ? "Maendeleo" : "Module progress"}</span>
-                <strong>
-                  {doneCount}/5 · {completionPercent(order, progress)}%
-                </strong>
-              </p>
-              <p>
-                <span>XP</span>
-                <strong>{progress.totalXp}</strong>
-              </p>
-              <p>
-                <span>{isSw ? "Umri" : "Age"}</span>
-                <strong>{ageLabel(profile.ageBand, locale)}</strong>
-              </p>
+            <section className="learn-hub-pies" aria-label={isSw ? "Hali ya mwanafunzi" : "Learner status"}>
+              <StatPie
+                label={isSw ? "Maendeleo ya moduli" : "Module progress"}
+                value={`${doneCount}/5`}
+                percent={modulePct}
+                reduce={reduce}
+              />
+              <StatPie
+                label="XP"
+                value={String(progress.totalXp)}
+                percent={xpPct}
+                reduce={reduce}
+              />
+              <StatPie
+                label={isSw ? "Kiwango" : "Level"}
+                value={levelLabel(profile.level, locale)}
+                percent={profile.level === "advanced" ? 100 : profile.level === "intermediate" ? 67 : 34}
+                reduce={reduce}
+              />
+              <StatPie
+                label={isSw ? "Umri" : "Age"}
+                value={ageLabel(profile.ageBand, locale)}
+                percent={profile.ageBand === "adult" ? 100 : profile.ageBand === "youth" ? 67 : 34}
+                reduce={reduce}
+              />
               {careerLabel && (
-                <p>
-                  <span>{isSw ? "Kazi" : "Career"}</span>
-                  <strong>{careerLabel}</strong>
-                </p>
+                <StatPie
+                  label={isSw ? "Kazi" : "Career"}
+                  value={careerLabel}
+                  percent={100}
+                  reduce={reduce}
+                  compact
+                />
               )}
             </section>
           )}
@@ -354,63 +362,44 @@ function PlacedCard({
   );
 }
 
-function GainBar({
-  locale,
-  baseline,
-  outcome,
-  gain,
+function StatPie({
+  label,
+  value,
+  percent,
+  reduce,
+  compact = false,
 }: {
-  locale: "en" | "sw";
-  baseline: number | null;
-  outcome: number | null;
-  gain: number | null;
+  label: string;
+  value: string;
+  percent: number;
+  reduce: boolean | null;
+  compact?: boolean;
 }) {
-  const isSw = locale === "sw";
+  const radius = 42;
+  const circ = 2 * Math.PI * radius;
+  const clamped = Math.max(0, Math.min(100, percent));
+  const drawn = (clamped / 100) * circ;
   return (
-    <section className="learn-gain" aria-label={isSw ? "Ongezeko" : "Gain"}>
-      <div className="learn-gain-head">
-        <h2>{isSw ? "Ongezeko dhidi ya msingi" : "Gain against the pre-check"}</h2>
-        {gain === null ? (
-          <p className="learn-gain-pending">{isSw ? "Ongezeko bado halijaingia." : "Gain is not in yet."}</p>
-        ) : (
-          <p className="learn-gain-delta">
-            {isSw ? "Ongezeko" : "Gain"} {gain > 0 ? `+${gain}` : gain}
-          </p>
-        )}
-      </div>
-      {baseline === null ? (
-        <p className="learn-gain-note">
-          {isSw
-            ? "Msingi unawekwa na pre-check. Kupita moduli pekee si ongezeko."
-            : "The baseline is set by the pre-check. A module pass alone is not gain."}
-        </p>
-      ) : (
-        <>
-          <ScoreRow
-            label={isSw ? `Msingi ${baseline} kati ya 12` : `Baseline ${baseline} of 12`}
-            value={baseline}
+    <article className="learn-hub-pie-card">
+      <div className="learn-hub-pie-visual">
+        <svg viewBox="0 0 120 120" className="learn-hub-pie" role="img" aria-label={`${label}: ${value}`}>
+          <circle cx="60" cy="60" r={radius} className="learn-hub-pie-track" />
+          <motion.circle
+            cx="60"
+            cy="60"
+            r={radius}
+            className="learn-hub-pie-fill"
+            strokeDasharray={circ}
+            initial={{ strokeDashoffset: reduce ? circ - drawn : circ }}
+            animate={{ strokeDashoffset: circ - drawn }}
+            transition={{ duration: reduce ? 0 : 0.9, ease: [0.16, 1, 0.3, 1] }}
+            transform="rotate(-90 60 60)"
           />
-          {outcome !== null && (
-            <ScoreRow
-              label={isSw ? `Ukaguzi bora ${outcome} kati ya 12` : `Best check ${outcome} of 12`}
-              value={outcome}
-            />
-          )}
-        </>
-      )}
-    </section>
-  );
-}
-
-function ScoreRow({ label, value }: { label: string; value: number }) {
-  const width = Math.max(0, Math.min(100, Math.round((value / 12) * 100)));
-  return (
-    <div className="learn-gain-row">
-      <span>{label}</span>
-      <div className="learn-gain-track" aria-hidden>
-        <span style={{ width: `${width}%` }} />
+        </svg>
+        <p className={compact ? "learn-hub-pie-center is-compact" : "learn-hub-pie-center"}>{value}</p>
       </div>
-    </div>
+      <p className="learn-hub-pie-label">{label}</p>
+    </article>
   );
 }
 

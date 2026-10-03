@@ -2820,3 +2820,384 @@
 .learn-hub-module-item-done {
   box-shadow: inset 3px 0 0 var(--learn-teal);
 }
+
+/* Pre-check steps fill the studio instead of sitting in a small card. */
+.precheck-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  min-height: calc(100dvh - 6.25rem);
+  padding-top: 0.25rem;
+}
+
+.precheck-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.precheck-head-row,
+.precheck-count {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.precheck-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: #92400e;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.precheck-count {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.precheck-percent {
+  color: #115e59;
+  font-weight: 800;
+}
+
+.precheck-progress {
+  height: 0.45rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.precheck-progress > div {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f59e0b, #0f766e);
+}
+
+.precheck-saved {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0;
+  color: #0f766e;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.precheck-step {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+  padding: 1.05rem 1.1rem 1.15rem;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 1.4rem;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px);
+}
+
+.precheck-prompt {
+  display: grid;
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.precheck-prompt.has-art {
+  grid-template-columns: 1fr;
+}
+
+.precheck-prompt-art {
+  width: 100%;
+  height: 8.5rem;
+  object-fit: cover;
+  border-radius: 1.1rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.precheck-domain,
+.precheck-lead {
+  margin: 0;
+}
+
+.precheck-domain {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.precheck-lead {
+  margin-top: 0.35rem;
+  max-width: 46rem;
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.precheck-prompt h3 {
+  margin: 0.35rem 0 0;
+  color: #0f172a;
+  font-size: clamp(1.45rem, 2.4vw, 2.15rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.precheck-options {
+  display: grid;
+  flex: 1;
+  gap: 0.8rem;
+  min-height: 0;
+}
+
+.precheck-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  width: 100%;
+  height: 100%;
+  min-height: 6.75rem;
+  padding: 1.15rem 1.2rem;
+  border: 1.5px solid rgba(15, 23, 42, 0.12);
+  border-radius: 1.15rem;
+  background: rgba(255, 255, 255, 0.94);
+  color: #1e293b;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.precheck-option:hover {
+  border-color: rgba(15, 118, 110, 0.45);
+  transform: translateY(-2px);
+}
+
+.precheck-option.is-selected {
+  border-color: #0f766e;
+  background: #f0fdfa;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.16);
+}
+
+.precheck-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  margin-top: 0.1rem;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 999px;
+  background: #fff;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.precheck-option.is-selected .precheck-mark {
+  border-color: #0f766e;
+  background: #0f766e;
+  color: #fff;
+}
+
+.precheck-option-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.precheck-option-label {
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.precheck-option-desc {
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.precheck-career-row {
+  display: flex;
+  flex: 1;
+  gap: 0.75rem;
+  min-height: 16rem;
+  overflow-x: auto;
+  padding: 0.15rem 0.15rem 0.55rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+
+.precheck-career-card {
+  position: relative;
+  display: flex;
+  flex: 0 0 12.5rem;
+  flex-direction: column;
+  min-height: 16rem;
+  padding: 0.45rem;
+  border: 1.5px solid rgba(15, 23, 42, 0.12);
+  border-radius: 1.15rem;
+  background: rgba(255, 255, 255, 0.96);
+  text-align: left;
+  cursor: pointer;
+  scroll-snap-align: start;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.precheck-career-card:hover {
+  border-color: rgba(15, 118, 110, 0.5);
+  transform: translateY(-3px);
+}
+
+.precheck-career-card.is-selected {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18);
+}
+
+.precheck-career-photo {
+  display: block;
+  flex: 1;
+  min-height: 8.5rem;
+  overflow: hidden;
+  border-radius: 0.85rem;
+  background: #e2e8f0;
+}
+
+.precheck-career-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1);
+  transition: transform 280ms ease;
+}
+
+.precheck-career-card:hover .precheck-career-photo img,
+.precheck-career-card.is-selected .precheck-career-photo img {
+  transform: scale(1.04);
+}
+
+.precheck-career-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.7rem 0.35rem 0.4rem;
+}
+
+.precheck-career-label {
+  color: #0f172a;
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.precheck-career-desc {
+  color: #64748b;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.precheck-check {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 999px;
+  background: #0f766e;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(15, 118, 110, 0.35);
+}
+
+.precheck-career-card:not(.is-selected) .precheck-check {
+  opacity: 0;
+}
+
+.precheck-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.15rem;
+}
+
+.precheck-nav-btn {
+  min-height: 2.85rem;
+  gap: 0.45rem;
+}
+
+.precheck-nav-next {
+  background: #0f766e;
+  color: #fff;
+}
+
+.precheck-nav-next:hover {
+  background: #115e59;
+}
+
+@media (min-width: 720px) {
+  .precheck-prompt.has-art {
+    grid-template-columns: 16.5rem 1fr;
+  }
+
+  .precheck-prompt-art {
+    height: 7.5rem;
+  }
+
+  .precheck-options.count-2,
+  .precheck-options.count-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .precheck-options.count-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .precheck-options.count-4 {
+    grid-template-rows: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1180px) {
+  .precheck-career-row {
+    overflow: visible;
+  }
+
+  .precheck-career-card {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .precheck-option,
+  .precheck-career-card,
+  .precheck-career-photo img {
+    transition: none;
+  }
+
+  .precheck-option:hover,
+  .precheck-career-card:hover,
+  .precheck-career-card:hover .precheck-career-photo img,
+  .precheck-career-card.is-selected .precheck-career-photo img {
+    transform: none;
+  }
+}

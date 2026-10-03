@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import confetti from "canvas-confetti";
 import {
   UNIFIED_15_QUESTIONS,
@@ -11,16 +11,50 @@ import {
 import type { AgeBand, CareerId, LearnLevel } from "@/lib/learn/types";
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/ui/loader";
+import { GENERAL_CAREERS } from "@/lib/learn/general-careers";
 import {
   ArrowRight,
   ArrowLeft,
-  CheckCircle2,
+  Check,
   Sparkles,
   BookmarkCheck,
   Award,
   Layers,
   Compass,
 } from "lucide-react";
+
+const QUESTION_ART: Record<
+  string,
+  { src: string; alt: { en: string; sw: string } }
+> = {
+  "pq-9-computer-vision": {
+    src: "/learn/hero-section.png",
+    alt: {
+      en: "A person looking at a photo on a tablet",
+      sw: "Mtu akiangalia picha kwenye kompyuta kibao",
+    },
+  },
+  "pq-14-agriculture": {
+    src: "/learn/careers/agriculture.jpg",
+    alt: {
+      en: "A farmer working among crops",
+      sw: "Mkulima akifanya kazi shambani",
+    },
+  },
+  "pq-15-hitl": {
+    src: "/learn/learn-module-placeholder-health.png",
+    alt: {
+      en: "A clinician reviewing notes with a patient",
+      sw: "Daktari akipitia maelezo na mgonjwa",
+    },
+  },
+};
+
+function careerImage(id: string) {
+  const match = GENERAL_CAREERS.find((career) => career.id === id);
+  if (!match) return "/learn/learn-module-placeholder-enterprise.png";
+  return match.avatar.replace("w=100", "w=800");
+}
 
 export const PLACEMENT_DRAFT_KEY = "savannamind-placement-draft-v2";
 
@@ -53,6 +87,8 @@ export function PreAssessmentQuiz({
   const [stage, setStage] = useState<QuizStage>("questions");
   const [hasLoadedDraft, setHasLoadedDraft] = useState(false);
   const [finalResult, setFinalResult] = useState<PlacementResult | null>(null);
+  const [direction, setDirection] = useState(1);
+  const reduceMotion = useReducedMotion();
 
   // Restore progress from local storage on mount
   useEffect(() => {
@@ -129,6 +165,7 @@ export function PreAssessmentQuiz({
 
   const handleNext = () => {
     if (!selectedOptionId) return;
+    setDirection(1);
 
     const updatedAnswers = {
       ...answers,
@@ -215,6 +252,7 @@ export function PreAssessmentQuiz({
 
   const handlePrevious = () => {
     if (currentIndex <= 0) return;
+    setDirection(-1);
     const prevIdx = currentIndex - 1;
     setCurrentIndex(prevIdx);
   };
@@ -343,162 +381,212 @@ export function PreAssessmentQuiz({
 
   // —— Stage 1: Questions Flow
   const progressPercent = Math.round(((currentIndex + 1) / totalQuestions) * 100);
+  const isSw = currentLocale === "sw";
+  const isCareer = question.id === "pq-3-career";
+  const promptArt = QUESTION_ART[question.id];
+  const slide = reduceMotion ? 0 : 42;
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 py-8">
-      {/* Top Header Card */}
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-900 font-semibold text-xs mb-3">
-          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-          <span>
-            {currentLocale === "sw"
-              ? "Tathmini ya Kujiunga ya Maswali 15"
-              : "15-Question Onboarding & Placement"}
-          </span>
-        </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-          {currentLocale === "sw"
-            ? `Karibu${nickname ? `, ${nickname}` : ""}! Wacha Tupate Njia Yako`
-            : `Welcome${nickname ? `, ${nickname}` : ""}! Find Your Path`}
-        </h2>
-        <p className="mt-2 text-sm text-slate-600 max-w-lg mx-auto leading-relaxed">
-          {currentLocale === "sw"
-            ? "Tathmini hii ya maswali 15 inafanywa mara moja tu ili kubaini kiwango chako cha AI na njia ya kazi. Maendeleo yako yanahifadhiwa kiotomatiki ukiondoka au kufunga ukurasa."
-            : "This 15-question pre-assessment is completed only once to calibrate your custom AI track and career modules. Progress is auto-saved after each question."}
-        </p>
-
-        {/* Progress Bar & Saved indicator */}
-        <div className="mt-6 max-w-md mx-auto">
-          <div className="flex justify-between items-center text-xs font-semibold text-slate-500 mb-1.5">
-            <span className="flex items-center gap-1.5">
-              <span>
-                {currentLocale === "sw"
-                  ? `Swali la ${currentIndex + 1} kati ya ${totalQuestions}`
-                  : `Question ${currentIndex + 1} of ${totalQuestions}`}
-              </span>
-              {Object.keys(answers).length > 0 && (
-                <span className="text-[10px] text-teal-700 bg-teal-50 border border-teal-200 px-1.5 py-0.5 rounded flex items-center gap-1">
-                  <BookmarkCheck className="w-3 h-3" />
-                  {currentLocale === "sw" ? "Imehifadhiwa" : "Auto-saved"}
-                </span>
-              )}
+    <div className="precheck-screen">
+      <div className="precheck-head">
+        <div className="precheck-head-row">
+          <p className="precheck-kicker">
+            <Sparkles className="w-3.5 h-3.5" aria-hidden />
+            <span>
+              {isSw ? "Tathmini ya kujiunga" : "Onboarding pre-check"}
             </span>
-            <span className="font-bold text-teal-800">{progressPercent}%</span>
-          </div>
-          <div className="w-full h-2.5 bg-slate-200/80 rounded-full overflow-hidden shadow-inner">
-            <motion.div
-              className="h-full bg-gradient-to-r from-amber-500 via-teal-600 to-teal-700 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPercent}%` }}
-              transition={{ duration: 0.3 }}
-            />
-          </div>
+          </p>
+          <p className="precheck-count">
+            <span>
+              {isSw
+                ? `Swali la ${currentIndex + 1} kati ya ${totalQuestions}`
+                : `Question ${currentIndex + 1} of ${totalQuestions}`}
+            </span>
+            <span className="precheck-percent">{progressPercent}%</span>
+          </p>
         </div>
+        <div className="precheck-progress" aria-hidden>
+          <motion.div
+            animate={{ width: `${progressPercent}%` }}
+            transition={{ duration: reduceMotion ? 0 : 0.35 }}
+          />
+        </div>
+        {Object.keys(answers).length > 0 ? (
+          <p className="precheck-saved">
+            <BookmarkCheck className="w-3.5 h-3.5" aria-hidden />
+            {isSw ? "Imehifadhiwa" : "Auto-saved"}
+          </p>
+        ) : null}
       </div>
 
-      {/* Question Card */}
-      <AnimatePresence mode="wait">
-        <motion.div
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.section
           key={question.id}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={{ duration: 0.2 }}
-          className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200"
+          className="precheck-step"
+          initial={{ opacity: 0, x: slide * direction }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: slide * direction * -1 }}
+          transition={{
+            duration: reduceMotion ? 0.01 : 0.32,
+            ease: [0.16, 1, 0.3, 1],
+          }}
         >
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              {question.isProfileMeta
-                ? currentLocale === "sw"
-                  ? "Wasifu na Lugha"
-                  : "Profile & Focus"
-                : currentLocale === "sw"
-                ? "Dhana za AI"
-                : "AI Fundamentals"}
-            </span>
+          <div className={promptArt ? "precheck-prompt has-art" : "precheck-prompt"}>
+            {promptArt ? (
+              <img
+                className="precheck-prompt-art"
+                src={promptArt.src}
+                alt={promptArt.alt[currentLocale]}
+              />
+            ) : null}
+            <div>
+              <p className="precheck-domain">
+                {question.isProfileMeta
+                  ? isSw
+                    ? "Wasifu na Lugha"
+                    : "Profile & Focus"
+                  : isSw
+                    ? "Dhana za AI"
+                    : "AI Fundamentals"}
+              </p>
+              {currentIndex === 0 ? (
+                <p className="precheck-lead">
+                  {isSw
+                    ? `Karibu${nickname ? `, ${nickname}` : ""}. Chagua lugha, umri, na kazi, kisha maswali ya AI yanapanga kiwango chako.`
+                    : `Welcome${nickname ? `, ${nickname}` : ""}. Choose your language, age, and career, then the AI questions place your level.`}
+                </p>
+              ) : null}
+              <h3>{question.question[currentLocale]}</h3>
+            </div>
           </div>
 
-          <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-6 leading-snug">
-            {question.question[currentLocale]}
-          </h3>
-
-          <div className="space-y-3">
-            {question.options.map((opt) => {
-              const isSelected = selectedOptionId === opt.id;
-              return (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => handleSelectOption(opt.id)}
-                  className={`w-full text-left p-4 rounded-xl border transition-all flex items-start gap-3.5 ${
-                    isSelected
-                      ? "border-teal-600 bg-teal-50/70 shadow-sm ring-2 ring-teal-600/30 text-slate-900"
-                      : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/60 text-slate-700"
-                  }`}
-                >
-                  <div
-                    className={`mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+          {isCareer ? (
+            <div
+              className="precheck-career-row"
+              role="listbox"
+              aria-label={isSw ? "Sekta za kazi" : "Career sectors"}
+            >
+              {question.options.map((opt) => {
+                const isSelected = selectedOptionId === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    role="option"
+                    aria-selected={isSelected}
+                    data-precheck-option={opt.id}
+                    onClick={() => handleSelectOption(opt.id)}
+                    className={
                       isSelected
-                        ? "border-teal-600 bg-teal-600 text-white"
-                        : "border-slate-300 bg-white"
-                    }`}
+                        ? "precheck-career-card is-selected"
+                        : "precheck-career-card"
+                    }
                   >
-                    {isSelected ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
-                    ) : (
-                      <span className="text-[11px] font-bold text-slate-400 uppercase">
-                        {opt.id.length <= 2 ? opt.id : "•"}
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <span className="text-sm sm:text-base font-semibold block leading-tight">
-                      {opt.text[currentLocale]}
+                    <span className="precheck-career-photo">
+                      <img src={careerImage(opt.id)} alt="" />
                     </span>
-                    {opt.description && (
-                      <span className="text-xs text-slate-500 mt-1 block leading-normal">
-                        {opt.description[currentLocale]}
+                    <span className="precheck-career-copy">
+                      <span className="precheck-career-label">
+                        {opt.text[currentLocale]}
                       </span>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="mt-8 flex justify-between items-center pt-4 border-t border-slate-100">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={currentIndex === 0}
-              onClick={handlePrevious}
-              className="text-xs text-slate-600 flex items-center gap-1.5 disabled:opacity-30"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>{currentLocale === "sw" ? "Swali Lililopita" : "Previous"}</span>
-            </Button>
-
-            <Button
-              type="button"
-              onClick={handleNext}
-              disabled={!selectedOptionId}
-              className="bg-teal-700 hover:bg-teal-800 text-white px-6 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-sm disabled:opacity-50"
-            >
-              <span>
-                {isLastQuestion
-                  ? currentLocale === "sw"
-                    ? "Kamilisha na Ufungue Moduli"
-                    : "Complete & Unlock Modules"
-                  : currentLocale === "sw"
-                  ? "Swali Linalofuata"
-                  : "Next Question"}
-              </span>
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </motion.div>
+                      {opt.description ? (
+                        <span className="precheck-career-desc">
+                          {opt.description[currentLocale]}
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="precheck-check" aria-hidden>
+                      {isSelected ? (
+                        <motion.span
+                          initial={reduceMotion ? false : { scale: 0.6, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ duration: 0.18 }}
+                        >
+                          <Check size={14} strokeWidth={3} />
+                        </motion.span>
+                      ) : null}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className={`precheck-options count-${question.options.length}`}>
+              {question.options.map((opt) => {
+                const isSelected = selectedOptionId === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    data-precheck-option={opt.id}
+                    onClick={() => handleSelectOption(opt.id)}
+                    className={
+                      isSelected
+                        ? "precheck-option w-full is-selected"
+                        : "precheck-option w-full"
+                    }
+                  >
+                    <span className="precheck-mark" aria-hidden>
+                      {isSelected ? (
+                        <motion.span
+                          initial={reduceMotion ? false : { scale: 0.55, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ duration: 0.16 }}
+                        >
+                          <Check size={14} strokeWidth={3} />
+                        </motion.span>
+                      ) : (
+                        <span>{opt.id.length <= 2 ? opt.id : "•"}</span>
+                      )}
+                    </span>
+                    <span className="precheck-option-copy">
+                      <span className="precheck-option-label">
+                        {opt.text[currentLocale]}
+                      </span>
+                      {opt.description ? (
+                        <span className="precheck-option-desc">
+                          {opt.description[currentLocale]}
+                        </span>
+                      ) : null}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </motion.section>
       </AnimatePresence>
+
+      <div className="precheck-nav">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={currentIndex === 0}
+          onClick={handlePrevious}
+          className="precheck-nav-btn"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>{isSw ? "Swali Lililopita" : "Previous"}</span>
+        </Button>
+        <Button
+          type="button"
+          data-precheck-next
+          onClick={handleNext}
+          disabled={!selectedOptionId}
+          className="precheck-nav-btn precheck-nav-next"
+        >
+          <span>
+            {isLastQuestion
+              ? isSw
+                ? "Kamilisha na Ufungue Moduli"
+                : "Complete & Unlock Modules"
+              : isSw
+                ? "Swali Linalofuata"
+                : "Next Question"}
+          </span>
+          <ArrowRight className="w-4 h-4" />
+        </Button>
+      </div>
     </div>
   );
 }

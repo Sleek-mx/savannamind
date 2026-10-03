@@ -164,13 +164,14 @@ if (!studioApp.includes("studio-intro.mp4") && !existsSync(join(root, "public/le
   ok("obsolete intro MP4 removed");
 } else fail("obsolete intro MP4 still referenced or present");
 if (
-  studioApp.includes("proceedWithCaptchaCheck(\"home\")") &&
+  studioApp.includes("openStudio(\"home\")") &&
   studioApp.includes("onStartPrecheck") &&
   studioApp.includes("<LearnHub") &&
   studioApp.includes("PreAssessmentQuiz") &&
-  studioApp.includes("TurnstileGate")
+  !studioApp.includes("Turnstile") &&
+  !studioApp.includes("verify-captcha")
 ) {
-  ok("Get Started opens the locked dashboard; pre-check still uses the existing quiz after Turnstile");
+  ok("Get Started opens the locked dashboard; pre-check still uses the existing quiz");
 } else fail("studio entry does not route new learners to the locked dashboard");
 
 const flashcards = readFileSync(join(learnComponents, "flashcard-bullets.tsx"), "utf8");
@@ -247,7 +248,7 @@ if (
   certificatePdf.includes("Dr. Tawfiq Bashir") &&
   certificatePdf.includes("embedPng") &&
   certificateRoute.includes("courseCertificateReady") &&
-  certificateRoute.includes("assessTurnstile") &&
+  !certificateRoute.includes("assessTurnstile") &&
   certificateRoute.includes("buildCertificatePdf")
 ) {
   ok("certificate PDF names Savanna Mind and Dr. Tawfiq Bashir after the course check");
@@ -259,31 +260,36 @@ if (!lessonPlayerCert.includes("View certificate") && !lessonPlayerCert.includes
 } else fail("lesson player still offers a certificate");
 
 const tutorRoute = readFileSync(join(root, "app/api/learn/tutor/route.ts"), "utf8");
-const captchaRoute = readFileSync(join(root, "app/api/auth/verify-captcha/route.ts"), "utf8");
-const turnstileLib = readFileSync(join(root, "lib/security/turnstile.ts"), "utf8");
-const publicTurnstile = readFileSync(join(root, "lib/security/turnstile-public.ts"), "utf8");
 const stateRoute = readFileSync(join(root, "app/api/learn/state/route.ts"), "utf8");
 const middlewareSrc = readFileSync(join(root, "middleware.ts"), "utf8");
+const envExample = readFileSync(join(root, ".env.example"), "utf8");
+const loginPage = readFileSync(join(root, "app/[locale]/login/page.tsx"), "utf8");
+const signupPage = readFileSync(join(root, "app/[locale]/signup/page.tsx"), "utf8");
 if (
-  !captchaRoute.includes('|| "1x0000000000000000000000000000000AA"') &&
-  !captchaRoute.includes("sm_turnstile_verified") &&
-  turnstileLib.includes('token.startsWith("XXXX")') &&
-  publicTurnstile.includes("TURNSTILE_SECRET_KEY") &&
-  publicTurnstile.includes("missing from the Vercel Production environment") &&
-  stateRoute.includes("assessTurnstile") &&
-  tutorRoute.includes("assessTurnstile") &&
-  middlewareSrc.includes("LESSON_PATH") &&
-  middlewareSrc.includes("assessTurnstile")
+  !existsSync(join(root, "components/auth/turnstile-gate.tsx")) &&
+  !existsSync(join(root, "lib/security/turnstile.ts")) &&
+  !existsSync(join(root, "app/api/auth/verify-captcha/route.ts")) &&
+  !stateRoute.includes("assessTurnstile") &&
+  !stateRoute.includes("TURNSTILE") &&
+  !tutorRoute.includes("assessTurnstile") &&
+  !tutorRoute.includes("TURNSTILE") &&
+  !middlewareSrc.includes("assessTurnstile") &&
+  !middlewareSrc.includes("TURNSTILE") &&
+  !envExample.includes("TURNSTILE") &&
+  !loginPage.includes("turnstile") &&
+  !loginPage.includes("TURNSTILE") &&
+  !signupPage.includes("turnstile") &&
+  !signupPage.includes("TURNSTILE")
 ) {
-  ok("Turnstile is verified on the server and fails closed without TURNSTILE_SECRET_KEY");
-} else fail("Turnstile still accepts a test secret or does not gate learn state");
+  ok("Turnstile widget, siteverify, and env vars are removed");
+} else fail("Turnstile is still referenced");
 
-const gateCheck = spawnSync("npx", ["--yes", "tsx", "scripts/check-turnstile-certificate.ts"], {
+const gateCheck = spawnSync("npx", ["--yes", "tsx", "scripts/check-certificate.ts"], {
   cwd: root,
   encoding: "utf8",
 });
-if (gateCheck.status === 0) ok("production Turnstile rejects test tokens and the certificate PDF renders");
-else fail(`turnstile/certificate behavior: ${gateCheck.stderr || gateCheck.stdout}`);
+if (gateCheck.status === 0) ok("certificate PDF still renders after the end-of-course check");
+else fail(`certificate behavior: ${gateCheck.stderr || gateCheck.stdout}`);
 if (
   kibo.includes("learnerName") &&
   tutorRoute.includes("learnerName") &&

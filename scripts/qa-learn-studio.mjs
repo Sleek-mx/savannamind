@@ -114,10 +114,11 @@ if (
   !hub.includes("Gain against the pre-check") &&
   hub.includes("onStartPrecheck") &&
   hub.includes("outcomeBestScore") &&
-  hub.includes("learn-hub-pie")
+  hub.includes("learn-hub-pie") &&
+  hub.includes("learn-hub-text-card")
 ) {
-  ok("dashboard hides the gain card and charts module progress, XP, and learner stats");
-} else fail("dashboard gain card is still shown or the stat pies are missing");
+  ok("dashboard hides the gain card, charts module progress and XP, and shows level, age, and career as text");
+} else fail("dashboard gain card is still shown or the stat layout drifted");
 
 const timed = JSON.parse(
   readFileSync(join(root, "lib/learn/timed-quizzes.json"), "utf8")

@@ -229,11 +229,61 @@ if (hub.includes("deriveLearnerName") && hub.includes("displayName")) {
 } else fail("dashboard does not display derived learner name");
 
 const certificate = readFileSync(join(learnComponents, "certificate-view.tsx"), "utf8");
-if (certificate.includes("deriveLearnerName")) {
-  ok("certificate receives auto-derived learner name");
-} else fail("certificate does not use derived learner name");
+if (
+  certificate.includes("deriveLearnerName") &&
+  certificate.includes("courseCertificateReady") &&
+  certificate.includes("Dr. Tawfiq Bashir") &&
+  certificate.includes("/api/learn/certificate") &&
+  !certificate.includes("Preview certificate") &&
+  !certificate.includes("Layout preview")
+) {
+  ok("certificate is offered with the learner name only after the end-of-course check");
+} else fail("certificate preview is still offered before the end-of-course check");
+
+const certificatePdf = readFileSync(join(root, "lib/learn/certificate-pdf.ts"), "utf8");
+const certificateRoute = readFileSync(join(root, "app/api/learn/certificate/route.ts"), "utf8");
+if (
+  certificatePdf.includes("Savanna Mind") &&
+  certificatePdf.includes("Dr. Tawfiq Bashir") &&
+  certificatePdf.includes("embedPng") &&
+  certificateRoute.includes("courseCertificateReady") &&
+  certificateRoute.includes("assessTurnstile") &&
+  certificateRoute.includes("buildCertificatePdf")
+) {
+  ok("certificate PDF names Savanna Mind and Dr. Tawfiq Bashir after the course check");
+} else fail("certificate PDF is missing a signatory or the completion gate");
+
+const lessonPlayerCert = readFileSync(join(learnComponents, "lesson-player.tsx"), "utf8");
+if (!lessonPlayerCert.includes("View certificate") && !lessonPlayerCert.includes("Angalia cheti")) {
+  ok("lesson player does not offer the certificate before the end-of-course check");
+} else fail("lesson player still offers a certificate");
 
 const tutorRoute = readFileSync(join(root, "app/api/learn/tutor/route.ts"), "utf8");
+const captchaRoute = readFileSync(join(root, "app/api/auth/verify-captcha/route.ts"), "utf8");
+const turnstileLib = readFileSync(join(root, "lib/security/turnstile.ts"), "utf8");
+const publicTurnstile = readFileSync(join(root, "lib/security/turnstile-public.ts"), "utf8");
+const stateRoute = readFileSync(join(root, "app/api/learn/state/route.ts"), "utf8");
+const middlewareSrc = readFileSync(join(root, "middleware.ts"), "utf8");
+if (
+  !captchaRoute.includes('|| "1x0000000000000000000000000000000AA"') &&
+  !captchaRoute.includes("sm_turnstile_verified") &&
+  turnstileLib.includes('token.startsWith("XXXX")') &&
+  publicTurnstile.includes("TURNSTILE_SECRET_KEY") &&
+  publicTurnstile.includes("missing from the Vercel Production environment") &&
+  stateRoute.includes("assessTurnstile") &&
+  tutorRoute.includes("assessTurnstile") &&
+  middlewareSrc.includes("LESSON_PATH") &&
+  middlewareSrc.includes("assessTurnstile")
+) {
+  ok("Turnstile is verified on the server and fails closed without TURNSTILE_SECRET_KEY");
+} else fail("Turnstile still accepts a test secret or does not gate learn state");
+
+const gateCheck = spawnSync("npx", ["--yes", "tsx", "scripts/check-turnstile-certificate.ts"], {
+  cwd: root,
+  encoding: "utf8",
+});
+if (gateCheck.status === 0) ok("production Turnstile rejects test tokens and the certificate PDF renders");
+else fail(`turnstile/certificate behavior: ${gateCheck.stderr || gateCheck.stdout}`);
 if (
   kibo.includes("learnerName") &&
   tutorRoute.includes("learnerName") &&

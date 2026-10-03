@@ -10,7 +10,9 @@ import { GetStartedButton } from "@/components/ui/get-started-button";
 import { ContinueButton } from "@/components/ui/continue-button";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { hydrateLearnStateFromCloud } from "@/lib/learn/cloud-sync";
+import { courseCertificateReady } from "@/lib/learn/certificate-eligibility";
 import { deriveLearnerName } from "@/lib/learn/learner-name";
+import { loadProgress, saveProgress } from "@/lib/learn/progress";
 import { loadProfile, saveProfile } from "@/lib/learn/storage";
 import { useAuth } from "@/lib/supabase/auth-context";
 import type { LearnProfile } from "@/lib/learn/types";
@@ -32,6 +34,7 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
   const [profile, setProfile] = useState<LearnProfile | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [showTurnstile, setShowTurnstile] = useState(false);
+  const [turnstileNotice, setTurnstileNotice] = useState<string | null>(null);
   const [pendingDestination, setPendingDestination] = useState<"home" | "placement" | "outcome" | null>(null);
   const [introStage, setIntroStage] = useState(0);
   const [introExiting, setIntroExiting] = useState(false);
@@ -48,16 +51,16 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
 
   const proceedWithCaptchaCheck = useCallback(
     (destination: "home" | "placement" | "outcome") => {
-      const hasPassedTurnstile =
-        typeof window !== "undefined" &&
-        sessionStorage.getItem("sm_turnstile_passed") === "true";
-
-      if (!hasPassedTurnstile) {
-        setPendingDestination(destination);
-        setShowTurnstile(true);
-        return;
-      }
-      window.setTimeout(() => setPhase(destination), reduceMotion ? 0 : 420);
+      void (async () => {
+        const status = await readTurnstileStatus();
+        if (!status.verified) {
+          setTurnstileNotice(status.error ?? null);
+          setPendingDestination(destination);
+          setShowTurnstile(true);
+          return;
+        }
+        window.setTimeout(() => setPhase(destination), reduceMotion ? 0 : 420);
+      })();
     },
     [reduceMotion]
   );
@@ -75,9 +78,14 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
 
   const handleTurnstileVerified = useCallback(() => {
     setShowTurnstile(false);
+    setTurnstileNotice(null);
     const dest = pendingDestination || "home";
     setPendingDestination(null);
-    setPhase(dest);
+    void hydrateLearnStateFromCloud()
+      .catch(() => {
+        /* offline — keep local cache */
+      })
+      .finally(() => setPhase(dest));
   }, [pendingDestination]);
 
   const handlePlacementComplete = useCallback(
@@ -120,13 +128,26 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
       }
       const previous = profile.outcomeBestScore;
       const best = previous === undefined ? score : Math.max(previous, score);
+      const completedAt = new Date().toISOString();
       const next: LearnProfile = {
         ...profile,
         outcomeBestScore: best,
-        outcomeCompletedAt: new Date().toISOString(),
+        outcomeCompletedAt: completedAt,
       };
       saveProfile(next);
       setProfile(next);
+      const progress = loadProgress();
+      if (
+        courseCertificateReady({
+          modules: progress.modules,
+          outcomeBestScore: best,
+          outcomeCompletedAt: completedAt,
+        }) &&
+        !progress.certificateIssuedAt
+      ) {
+        progress.certificateIssuedAt = completedAt;
+        saveProgress(progress);
+      }
       setPhase("home");
     },
     [profile]
@@ -166,12 +187,11 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
       // Signup and lesson redirects land on the dashboard. The pre-check starts from there.
       // A completed placement is never cleared by ?onboarding=1.
       if (searchParams.get("hub") === "1" && searchParams.get("onboarding") !== "1") {
-        const hasPassedTurnstile =
-          typeof window !== "undefined" &&
-          sessionStorage.getItem("sm_turnstile_passed") === "true";
-        if (hasPassedTurnstile) {
+        const status = await readTurnstileStatus();
+        if (status.verified) {
           setPhase("home");
         } else {
+          setTurnstileNotice(status.error ?? null);
           setPendingDestination("home");
           setShowTurnstile(true);
         }
@@ -213,6 +233,7 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
         <TurnstileGate
           isOpen={showTurnstile}
           locale={locale}
+          notice={turnstileNotice}
           onVerified={handleTurnstileVerified}
           onCancel={() => setShowTurnstile(false)}
         />
@@ -350,11 +371,25 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
       <TurnstileGate
         isOpen={showTurnstile}
         locale={locale}
+        notice={turnstileNotice}
         onVerified={handleTurnstileVerified}
         onCancel={() => setShowTurnstile(false)}
       />
     </div>
   );
+}
+
+async function readTurnstileStatus(): Promise<{ verified: boolean; error?: string }> {
+  try {
+    const res = await fetch("/api/auth/verify-captcha", { credentials: "include", cache: "no-store" });
+    const data = (await res.json()) as { verified?: unknown; error?: unknown };
+    return {
+      verified: data.verified === true,
+      error: typeof data.error === "string" ? data.error : undefined,
+    };
+  } catch {
+    return { verified: false };
+  }
 }
 
 function SplashLogo() {

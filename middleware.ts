@@ -2,10 +2,12 @@ import createIntlMiddleware from "next-intl/middleware";
 import { type NextRequest, NextResponse } from "next/server";
 import { routing } from "./i18n/routing";
 import { updateSession } from "@/lib/supabase/middleware";
+import { assessTurnstile } from "@/lib/security/turnstile";
 
 const intlMiddleware = createIntlMiddleware(routing);
 
 const STUDIO_PATH = /^\/(en|sw)\/learn\/studio(\/|$)/;
+const LESSON_PATH = /^\/(en|sw)\/learn\/studio\/lesson(\/|$)/;
 /**
  * The public marketing website has been removed from the app. The locale root
  * and the retired public pages now open the auth entry screen instead.
@@ -36,6 +38,23 @@ export async function middleware(request: NextRequest) {
     const loginUrl = loginUrlFor(request);
     loginUrl.searchParams.set("next", pathname + request.nextUrl.search);
     return NextResponse.redirect(loginUrl);
+  }
+
+  if (user && LESSON_PATH.test(pathname)) {
+    const decision = await assessTurnstile(request);
+    if (!decision.ok) {
+      const locale = pathname.split("/")[1] || routing.defaultLocale;
+      const url = request.nextUrl.clone();
+      url.pathname = `/${locale}/learn/studio`;
+      url.search = "";
+      url.searchParams.set("hub", "1");
+      url.searchParams.set("captcha", decision.code === "turnstile_misconfigured" ? "misconfigured" : "1");
+      const redirect = NextResponse.redirect(url);
+      supabaseResponse.cookies.getAll().forEach((cookie) => {
+        redirect.cookies.set(cookie.name, cookie.value, cookie);
+      });
+      return redirect;
+    }
   }
 
   const intlResponse = intlMiddleware(request);

@@ -374,11 +374,6 @@ export function LessonPlayer({
                 {isSw ? `Endelea: ${nextMeta.titleSw}` : `Continue: ${nextMeta.titleEn}`}
               </Button>
             )}
-            {module.id === "s5" && (
-              <Button variant="outline" href={`/${locale}/learn/studio/certificate`}>
-                {isSw ? "Angalia cheti (onyesho)" : "View certificate (preview)"}
-              </Button>
-            )}
           </div>
         </motion.div>
       </div>

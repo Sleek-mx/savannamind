@@ -109,9 +109,15 @@ if (youtubeGate.includes("event.data === 0") && youtubeGate.includes("Rewatch fr
 } else fail("video question lock is not tied to the player ended state");
 
 const hub = readFileSync(join(learnComponents, "learn-hub.tsx"), "utf8");
-if (hub.includes("Gain is not in yet.") && hub.includes("onStartPrecheck") && hub.includes("outcomeBestScore")) {
-  ok("dashboard shows baseline gain only after a comparable check");
-} else fail("dashboard gain bar missing");
+if (
+  !hub.includes("Gain is not in yet.") &&
+  !hub.includes("Gain against the pre-check") &&
+  hub.includes("onStartPrecheck") &&
+  hub.includes("outcomeBestScore") &&
+  hub.includes("learn-hub-pie")
+) {
+  ok("dashboard hides the gain card and charts module progress, XP, and learner stats");
+} else fail("dashboard gain card is still shown or the stat pies are missing");
 
 const timed = JSON.parse(
   readFileSync(join(root, "lib/learn/timed-quizzes.json"), "utf8")

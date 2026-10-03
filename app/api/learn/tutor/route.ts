@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { moduleCard } from "@/lib/learn/modules";
 import type { LearnLevel } from "@/lib/learn/types";
-import { assessTurnstile } from "@/lib/security/turnstile";
-
 // Verified working model id (lowercase) — "DeepSeek-V4.1-Flash" returns 404 model_not_found.
 const BAI_BASE = process.env.BAI_BASE_URL ?? "https://api.b.ai/v1";
 const BAI_MODEL = (process.env.BAI_MODEL?.trim() || "deepseek-v4.1-flash").toLowerCase();
@@ -54,11 +52,6 @@ function sanitizeHistory(raw: unknown): { role: "user" | "assistant"; content: s
 }
 
 export async function POST(req: NextRequest) {
-  const gate = await assessTurnstile(req);
-  if (!gate.ok) {
-    return NextResponse.json({ error: gate.error, code: gate.code }, { status: gate.status });
-  }
-
   const key = process.env.BAI_API_KEY;
   if (!key) {
     return NextResponse.json(

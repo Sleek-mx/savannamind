@@ -1,22 +1,13 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { readCloudLearnState } from "@/lib/learn/server-state";
 import { courseCertificateReady } from "@/lib/learn/certificate-eligibility";
 import { buildCertificatePdf, certificateDisplayName } from "@/lib/learn/certificate-pdf";
 import { deriveLearnerName } from "@/lib/learn/learner-name";
-import { assessTurnstile } from "@/lib/security/turnstile";
 
-export async function GET(request: NextRequest) {
-  const decision = await assessTurnstile(request);
-  if (!decision.ok) {
-    return NextResponse.json(
-      { error: decision.error, code: decision.code },
-      { status: decision.status }
-    );
-  }
-
+export async function GET() {
   const supabase = createServerSupabaseClient();
   const {
     data: { user },

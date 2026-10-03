@@ -233,7 +233,7 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
   }
 
   return (
-    <div className="learn-studio relative min-h-screen w-full overflow-hidden">
+    <div className="learn-studio relative flex min-h-screen w-full flex-col overflow-x-hidden">
       <div
         className="pointer-events-none absolute inset-0 opacity-40 hidden lg:block bg-cover bg-center"
         style={{
@@ -250,7 +250,7 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
       />
 
       {phase !== "splash" && (
-        <header className="relative z-10 flex items-center justify-between px-6 py-5 max-w-6xl mx-auto">
+        <header className="relative z-10 mx-auto flex w-full max-w-[92rem] items-center justify-between px-4 py-5 sm:px-6">
           <Image
             src="/logo-full.png"
             alt="savannamind"
@@ -338,7 +338,7 @@ export function LearnStudioApp({ locale }: { locale: "en" | "sw" }) {
       )}
 
       {phase === "placement" && (
-        <main className="relative z-10 w-full max-w-3xl mx-auto px-4 py-6">
+        <main className="relative z-10 mx-auto flex w-full max-w-[92rem] flex-1 flex-col px-4 pb-6 sm:px-6">
           <PreAssessmentQuiz
             initialLocale={locale}
             nickname={learnerName}

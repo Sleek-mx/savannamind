@@ -189,40 +189,37 @@ export function LearnHub({
 
         <main className="learn-hub-main">
           {placed && profile && (
-            <section className="learn-hub-pies" aria-label={isSw ? "Hali ya mwanafunzi" : "Learner status"}>
-              <StatPie
-                label={isSw ? "Maendeleo ya moduli" : "Module progress"}
-                value={`${doneCount}/5`}
-                percent={modulePct}
-                reduce={reduce}
-              />
-              <StatPie
-                label="XP"
-                value={String(progress.totalXp)}
-                percent={xpPct}
-                reduce={reduce}
-              />
-              <StatPie
-                label={isSw ? "Kiwango" : "Level"}
-                value={levelLabel(profile.level, locale)}
-                percent={profile.level === "advanced" ? 100 : profile.level === "intermediate" ? 67 : 34}
-                reduce={reduce}
-              />
-              <StatPie
-                label={isSw ? "Umri" : "Age"}
-                value={ageLabel(profile.ageBand, locale)}
-                percent={profile.ageBand === "adult" ? 100 : profile.ageBand === "youth" ? 67 : 34}
-                reduce={reduce}
-              />
-              {careerLabel && (
+            <section className="learn-hub-stats" aria-label={isSw ? "Hali ya mwanafunzi" : "Learner status"}>
+              <div className="learn-hub-pies">
                 <StatPie
-                  label={isSw ? "Kazi" : "Career"}
-                  value={careerLabel}
-                  percent={100}
+                  label={isSw ? "Maendeleo ya moduli" : "Module progress"}
+                  value={`${doneCount}/5`}
+                  percent={modulePct}
                   reduce={reduce}
-                  compact
                 />
-              )}
+                <StatPie
+                  label="XP"
+                  value={String(progress.totalXp)}
+                  percent={xpPct}
+                  reduce={reduce}
+                />
+              </div>
+              <div className="learn-hub-text-cards">
+                <p className="learn-hub-text-card">
+                  <span>{isSw ? "Kiwango" : "Level"}</span>
+                  <strong>{levelLabel(profile.level, locale)}</strong>
+                </p>
+                <p className="learn-hub-text-card">
+                  <span>{isSw ? "Umri" : "Age"}</span>
+                  <strong>{ageLabel(profile.ageBand, locale)}</strong>
+                </p>
+                {careerLabel && (
+                  <p className="learn-hub-text-card">
+                    <span>{isSw ? "Kazi" : "Career"}</span>
+                    <strong>{careerLabel}</strong>
+                  </p>
+                )}
+              </div>
             </section>
           )}
 
@@ -367,13 +364,11 @@ function StatPie({
   value,
   percent,
   reduce,
-  compact = false,
 }: {
   label: string;
   value: string;
   percent: number;
   reduce: boolean | null;
-  compact?: boolean;
 }) {
   const radius = 42;
   const circ = 2 * Math.PI * radius;
@@ -396,7 +391,7 @@ function StatPie({
             transform="rotate(-90 60 60)"
           />
         </svg>
-        <p className={compact ? "learn-hub-pie-center is-compact" : "learn-hub-pie-center"}>{value}</p>
+        <p className="learn-hub-pie-center">{value}</p>
       </div>
       <p className="learn-hub-pie-label">{label}</p>
     </article>
